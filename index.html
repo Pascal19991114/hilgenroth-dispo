@@ -65,6 +65,7 @@ header{max-width:100%;margin:0 auto 24px;display:flex;justify-content:space-betw
 .ptb{font-size:16px;font-weight:700;color:var(--ink);text-transform:none;letter-spacing:-.01em}
 .view{display:none}
 .view.active{display:contents}
+.container.full.view{display:none}
 .container.full.view.active{display:block}
 .fg{margin-bottom:14px}
 label{display:block;font-size:12px;font-weight:600;margin-bottom:6px;color:var(--ink2);letter-spacing:-.005em}
@@ -207,6 +208,12 @@ td strong{color:var(--ink);font-weight:700}
 @media(max-width:1300px){.tour-grid{grid-template-columns:1fr 1fr;gap:12px}.t-time{width:fit-content}}
 @media(max-width:1100px){.container{grid-template-columns:1fr};body{padding:12px};.r2{grid-template-columns:1fr};.brand-div,.brand-text{display:none};.ov-db{font-size:28px}}
 @media(max-width:600px){header{padding:12px};.logo{height:44px};.panel{padding:16px};.ov-hero{padding:20px};.tour-grid{grid-template-columns:1fr}}
+
+.date-badge{display:inline-block;padding:3px 10px;border-radius:5px;font-size:11px;font-weight:700;white-space:nowrap}
+.date-badge.past{background:var(--asp-s);color:var(--ink3)}
+.date-badge.today{background:var(--grn-s);color:var(--grn)}
+.date-badge.future{background:var(--blu-s);color:var(--blu)}
+.alle-search-hl{background:rgba(209,26,44,.12);border-radius:2px}
 </style>
 </head>
 <body>
@@ -242,6 +249,10 @@ td strong{color:var(--ink);font-weight:700}
   <button class="tab" data-tab="overview">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
     Tagesübersicht
+  </button>
+  <button class="tab" data-tab="alle">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+    Alle Aufträge <span class="cnt" id="cntAlle">0</span>
   </button>
 </div>
 
@@ -424,6 +435,73 @@ td strong{color:var(--ink);font-weight:700}
   </div>
 </div>
 
+<!-- ALLE AUFTRÄGE -->
+<div class="container full view" id="view-alle">
+  <div class="panel" style="margin-bottom:20px">
+    <div class="toolbar">
+      <span class="ptb">📋 Alle Aufträge — Bearbeiten & Verwalten</span>
+      <div class="filters">
+        <input type="text" id="alleSearch" placeholder="Suchen (Kunde, Baustelle, Schachtmeister…)" style="width:280px;padding:8px 12px;font-size:13px">
+        <select id="alleFilter">
+          <option value="all">Alle Zeiträume</option>
+          <option value="past">Vergangene</option>
+          <option value="today">Heute</option>
+          <option value="future">Zukünftige</option>
+        </select>
+        <select id="alleType">
+          <option value="all">Fremdfirmen + Sundern</option>
+          <option value="fremd">Nur Fremdfirmen</option>
+          <option value="sundern">Nur Sundern</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- FREMD TABELLE -->
+    <div id="alleFremdSection">
+      <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);padding:12px 0 8px;border-bottom:1px solid var(--line);margin-bottom:0">
+        🏢 Fremdfirmen <span id="alleFremdCount" style="background:var(--brand);color:white;padding:2px 8px;border-radius:10px;font-size:11px;margin-left:6px">0</span>
+      </div>
+      <div class="tw">
+        <table id="tblAlleF" style="display:none">
+          <thead><tr>
+            <th>Datum</th><th>Kunde</th><th>Baustelle</th><th>Material</th>
+            <th>Sorte</th><th>Menge</th><th>Fzg-Typ</th><th>Fahrzeuge</th>
+            <th>Fahrer</th><th>Uhrzeit</th><th>Bemerkung</th><th></th>
+          </tr></thead>
+          <tbody id="bodyAlleF"></tbody>
+        </table>
+        <div id="emptyAlleF" class="empty" style="padding:30px 20px">
+          <div class="ico" style="font-size:28px">📋</div>
+          <h3>Keine Fremdfirmen-Aufträge gefunden</h3>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:24px"></div>
+
+    <!-- SUNDERN TABELLE -->
+    <div id="alleSundernSection">
+      <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);padding:12px 0 8px;border-bottom:1px solid var(--line);margin-bottom:0">
+        🏗 Sundern <span id="alleSundernCount" style="background:var(--grn);color:white;padding:2px 8px;border-radius:10px;font-size:11px;margin-left:6px">0</span>
+      </div>
+      <div class="tw">
+        <table id="tblAlleS" style="display:none">
+          <thead><tr>
+            <th>Datum</th><th>Schachtmeister</th><th>Auftr.-Nr.</th><th>Baustelle</th>
+            <th>Fzg-Typ</th><th>Anz.</th><th>Fahrzeuge</th><th>Fahrer</th>
+            <th>Material</th><th>Sorte</th><th>Menge</th><th>Uhrzeit</th><th>Bemerkung</th><th></th>
+          </tr></thead>
+          <tbody id="bodyAlleS"></tbody>
+        </table>
+        <div id="emptyAlleS" class="empty" style="padding:30px 20px">
+          <div class="ico" style="font-size:28px">🚧</div>
+          <h3>Keine Sundern-Aufträge gefunden</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="mb" id="fleetModal" onclick="if(event.target===this)closeFleet()">
   <div class="modal">
     <h2>Fahrzeuge & Fahrer verwalten</h2>
@@ -481,7 +559,7 @@ document.querySelectorAll('.tab').forEach(tab=>{
     document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
     tab.classList.add('active');
     document.getElementById('view-'+tab.dataset.tab).classList.add('active');
-    if(tab.dataset.tab==='overview')renderOv();
+    if(tab.dataset.tab==='overview')renderOv();if(tab.dataset.tab==='alle')renderAlle();
   });
 });
 
@@ -509,8 +587,8 @@ connRef.on('value',s=>{
   else{el.className='conn offline';tx.textContent='Offline'}
 });
 
-fremdRef.on('value',s=>{data.fremd=objArr(s.val());renderF();if(activeTab()==='overview')renderOv()});
-sundernRef.on('value',s=>{data.sundern=objArr(s.val());renderS();if(activeTab()==='overview')renderOv()});
+fremdRef.on('value',s=>{data.fremd=objArr(s.val());renderF();if(activeTab()==='overview')renderOv();if(activeTab()==='alle')renderAlle();document.getElementById('cntAlle').textContent=data.fremd.length+data.sundern.length});
+sundernRef.on('value',s=>{data.sundern=objArr(s.val());renderS();if(activeTab()==='overview')renderOv();if(activeTab()==='alle')renderAlle();document.getElementById('cntAlle').textContent=data.fremd.length+data.sundern.length});
 fleetRef.on('value',s=>{
   const v=s.val();
   if(v&&v.vehicles&&v.vehicles.length){
@@ -614,6 +692,7 @@ window.startEdit=function(type,id){
   document.querySelectorAll('tbody tr').forEach(r=>r.classList.remove('er'));
   const row=document.querySelector(`tr[data-id="${id}"]`);if(row)row.classList.add('er');
   panel.scrollIntoView({behavior:'smooth',block:'start'});
+  if(activeTab()==='alle')renderAlle();
   showToast('Auftrag wird bearbeitet','amber');
 };
 window.cancelEdit=function(type){
@@ -734,7 +813,7 @@ function renderOv(){
     <div><div class="tg-label">Baustelle</div><div class="t-bst">${o.baustelle?esc(o.baustelle):'—'}</div></div>
     <div><div class="tg-label">Fahrzeuge & Fahrer</div>${(o.vehicleTypes&&o.vehicleTypes.length)?`<div style="font-weight:700;margin-bottom:4px">${o.vehicleTypes.map(esc).join(', ')}${o.anzahl?' x'+esc(o.anzahl):''}</div>`:''} ${pills(o.vehicles)} ${pills(o.drivers)}</div>
     <div><div class="tg-label">Material</div><span class="badge ${o.material==='Strassenbaustoffe'?'sb':''}">${esc(o.material)}</span><div style="margin-top:6px;font-weight:600">${[o.sorte,o.menge].filter(Boolean).join(' · ')}</div></div>
-    <div class="t-time ${o.uhrzeit?'':'nt'}">${esc(o.uhrzeit)||'ohne Zeit'}</div>
+    <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end"><div class="t-time ${o.uhrzeit?'':'nt'}">${esc(o.uhrzeit)||'ohne Zeit'}</div><div class="row-a">${ra('sundern',o.id)}</div></div>
   </div>${o.bemerkung?`<div class="t-bem">${esc(o.bemerkung)}</div>`:''}</div>`).join('');
 
   document.getElementById('ovBodyF').innerHTML=fl.length===0?'<div class="ov-empty"><div class="ico">📋</div><h3>Keine Fremdfirmen-Touren</h3></div>':fl.map(o=>`<div class="tour-row"><div class="tour-grid">
@@ -742,7 +821,7 @@ function renderOv(){
     <div><div class="tg-label">Baustelle</div><div class="t-bst">${o.baustelle?esc(o.baustelle):'—'}</div></div>
     <div><div class="tg-label">Fahrzeuge & Fahrer</div>${(o.vehicleTypes&&o.vehicleTypes.length)?`<div style="font-weight:700;margin-bottom:4px">${o.vehicleTypes.map(esc).join(', ')}${o.anzahl?' x'+esc(o.anzahl):''}</div>`:''} ${pills(o.vehicles)} ${pills(o.drivers)}</div>
     <div><div class="tg-label">Material</div><span class="badge ${o.material==='Strassenbaustoffe'?'sb':''}">${esc(o.material)}</span><div style="margin-top:6px;font-weight:600">${[o.sorte,o.menge].filter(Boolean).join(' · ')}</div></div>
-    <div class="t-time ${o.uhrzeit?'':'nt'}">${esc(o.uhrzeit)||'ohne Zeit'}</div>
+    <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end"><div class="t-time ${o.uhrzeit?'':'nt'}">${esc(o.uhrzeit)||'ohne Zeit'}</div><div class="row-a">${ra('fremd',o.id)}</div></div>
   </div>${o.bemerkung?`<div class="t-bem">${esc(o.bemerkung)}</div>`:''}</div>`).join('');
 }
 
@@ -781,6 +860,103 @@ function dlXlsx(sheets,base){
   Object.entries(sheets).forEach(([n,rows])=>{const ws=XLSX.utils.json_to_sheet(rows);const cw=Object.keys(rows[0]||{}).map(k=>({wch:Math.max(k.length+2,14)}));ws['!cols']=cw;XLSX.utils.book_append_sheet(wb,ws,n)});
   XLSX.writeFile(wb,`${base}_${new Date().toISOString().split('T')[0]}.xlsx`);
 }
+
+// ===== ALLE AUFTRÄGE =====
+function getDateClass(iso){
+  if(!iso)return'past';
+  if(iso===todayISO)return'today';
+  return iso>todayISO?'future':'past';
+}
+function getDateLabel(iso){
+  if(!iso)return'—';
+  const cls=getDateClass(iso);
+  const labels={past:'Vergangen',today:'Heute',future:'Zukünftig'};
+  return`<span class="date-badge ${cls}">${fmtDate(iso)}</span>`;
+}
+
+function renderAlle(){
+  const search=document.getElementById('alleSearch').value.toLowerCase().trim();
+  const filter=document.getElementById('alleFilter').value;
+  const typeF=document.getElementById('alleType').value;
+
+  function matchDate(iso){
+    if(filter==='all')return true;
+    const cls=getDateClass(iso);
+    return cls===filter;
+  }
+  function matchSearch(str){
+    if(!search)return true;
+    return String(str||'').toLowerCase().includes(search);
+  }
+
+  // FREMD
+  let fremdList=data.fremd.filter(o=>matchDate(o.abholung)&&(matchSearch(o.firmenname)||matchSearch(o.baustelle)||matchSearch(o.sorte)||matchSearch(o.material)||matchSearch(o.bemerkung)));
+  fremdList.sort((a,b)=>(a.abholung||'').localeCompare(b.abholung||''));
+
+  // SUNDERN
+  let sundernList=data.sundern.filter(o=>matchDate(o.datum)&&(matchSearch(o.schachtmeister)||matchSearch(o.baustelle)||matchSearch(o.sorte)||matchSearch(o.material)||matchSearch(o.bemerkung)));
+  sundernList.sort((a,b)=>(a.datum||'').localeCompare(b.datum||''));
+
+  // Total count
+  document.getElementById('cntAlle').textContent=data.fremd.length+data.sundern.length;
+  document.getElementById('alleFremdCount').textContent=fremdList.length;
+  document.getElementById('alleSundernCount').textContent=sundernList.length;
+
+  // Show/hide sections
+  document.getElementById('alleFremdSection').style.display=typeF==='sundern'?'none':'block';
+  document.getElementById('alleSundernSection').style.display=typeF==='fremd'?'none':'block';
+
+  // Render FREMD
+  const tF=document.getElementById('tblAlleF'),eF=document.getElementById('emptyAlleF');
+  if(!fremdList.length||typeF==='sundern'){tF.style.display='none';eF.style.display=typeF==='sundern'?'none':'block'}
+  else{
+    tF.style.display='table';eF.style.display='none';
+    document.getElementById('bodyAlleF').innerHTML=fremdList.map(o=>`
+      <tr data-id="${o.id}" class="${editingId.fremd===o.id?'er':''}">
+        <td>${getDateLabel(o.abholung)}</td>
+        <td><strong>${esc(o.firmenname)}</strong></td>
+        <td>${esc(o.baustelle)}</td>
+        <td><span class="badge ${o.material==='Strassenbaustoffe'?'sb':''}">${esc(o.material)}</span></td>
+        <td>${esc(o.sorte)}</td>
+        <td>${esc(o.menge)}</td>
+        <td>${pills(o.vehicleTypes)}</td>
+        <td>${pills(o.vehicles)}</td>
+        <td>${pills(o.drivers)}</td>
+        <td>${esc(o.uhrzeit)}</td>
+        <td>${esc(o.bemerkung)}</td>
+        <td>${ra('fremd',o.id)}</td>
+      </tr>`).join('');
+  }
+
+  // Render SUNDERN
+  const tS=document.getElementById('tblAlleS'),eS=document.getElementById('emptyAlleS');
+  if(!sundernList.length||typeF==='fremd'){tS.style.display='none';eS.style.display=typeF==='fremd'?'none':'block'}
+  else{
+    tS.style.display='table';eS.style.display='none';
+    document.getElementById('bodyAlleS').innerHTML=sundernList.map(o=>`
+      <tr data-id="${o.id}" class="${editingId.sundern===o.id?'er':''}">
+        <td>${getDateLabel(o.datum)}</td>
+        <td><strong>${esc(o.schachtmeister)}</strong></td>
+        <td>${esc(o.auftragsnummer)}</td>
+        <td>${esc(o.baustelle)}</td>
+        <td>${pills(o.vehicleTypes)}</td>
+        <td>${esc(o.anzahl)}</td>
+        <td>${pills(o.vehicles)}</td>
+        <td>${pills(o.drivers)}</td>
+        <td><span class="badge ${o.material==='Strassenbaustoffe'?'sb':''}">${esc(o.material)}</span></td>
+        <td>${esc(o.sorte)}</td>
+        <td>${esc(o.menge)}</td>
+        <td>${esc(o.uhrzeit)}</td>
+        <td>${esc(o.bemerkung)}</td>
+        <td>${ra('sundern',o.id)}</td>
+      </tr>`).join('');
+  }
+}
+
+document.getElementById('alleSearch').addEventListener('input',renderAlle);
+document.getElementById('alleFilter').addEventListener('change',renderAlle);
+document.getElementById('alleType').addEventListener('change',renderAlle);
+
 function showToast(msg,v){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(v?' '+v:'');setTimeout(()=>t.classList.remove('show'),2200)}
 </script>
 </body>
