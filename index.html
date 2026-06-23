@@ -31,7 +31,7 @@ body{font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif
   background:radial-gradient(1200px 600px at 80% -10%,rgba(209,26,44,.04),transparent 60%),
     radial-gradient(900px 500px at -10% 20%,rgba(42,45,49,.03),transparent 60%),var(--bg);
   color:var(--ink);line-height:1.5;min-height:100vh;padding:20px;letter-spacing:-.005em}
-header{max-width:100%;margin:0 auto 24px;display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap;background:var(--bg-e);padding:16px 20px;border-radius:var(--rl);box-shadow:var(--sh-sm);border:1px solid var(--line)}
+header{max-width:100%;margin:0 auto 16px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;background:var(--bg-e);padding:12px 20px;border-radius:var(--rl);box-shadow:var(--sh-sm);border:1px solid var(--line)}
 .brand{display:flex;align-items:center;gap:18px}
 .logo{height:56px;width:auto;display:block}
 .brand-div{width:1px;height:40px;background:var(--line2)}
@@ -47,13 +47,13 @@ header{max-width:100%;margin:0 auto 24px;display:flex;justify-content:space-betw
 .conn.online .conn-dot{background:var(--grn);box-shadow:0 0 8px rgba(31,122,63,.5)}
 .conn.offline{color:var(--brand);border-color:var(--brand-s);background:var(--brand-s)}
 .conn.offline .conn-dot{background:var(--brand)}
-.tabs{margin:0 auto 16px;display:flex;gap:4px;background:var(--bg-e);padding:5px;border-radius:12px;box-shadow:var(--sh-sm);border:1px solid var(--line);width:fit-content}
-.tab{padding:10px 22px;background:transparent;border:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--ink3);border-radius:8px;transition:all .2s;font-family:inherit;display:flex;align-items:center;gap:8px}
-.tab:hover{color:var(--ink);background:var(--surf)}
-.tab.active{color:white;background:var(--ink);box-shadow:var(--sh-sm)}
-.tab .cnt{display:inline-flex;align-items:center;justify-content:center;min-width:22px;padding:1px 7px;background:var(--surf);color:var(--ink3);border-radius:12px;font-size:11px;font-weight:700}
+.tabs{display:flex;gap:2px;align-items:center}
+.tab{padding:6px 14px;background:transparent;border:none;cursor:pointer;font-size:12px;font-weight:600;color:var(--ink3);border-radius:6px;transition:all .15s;font-family:inherit;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.tab:hover{color:var(--ink);background:rgba(26,29,31,.06)}
+.tab.active{color:var(--ink);background:rgba(26,29,31,.09);box-shadow:inset 0 0 0 1px rgba(26,29,31,.12)}
+.tab .cnt{display:inline-flex;align-items:center;justify-content:center;min-width:18px;padding:1px 5px;background:var(--line);color:var(--ink3);border-radius:10px;font-size:10px;font-weight:700}
 .tab.active .cnt{background:var(--brand);color:white}
-.tab svg{opacity:.6}.tab.active svg{opacity:1}
+.tab svg{opacity:.5}.tab.active svg{opacity:.8}
 .container{margin:0 auto;display:grid;grid-template-columns:420px 1fr;gap:20px}
 .container.full{display:block}
 .panel{background:var(--bg-e);border:1px solid var(--line);border-radius:var(--rl);padding:24px;box-shadow:var(--sh-sm);transition:border-color .2s,box-shadow .2s}
@@ -244,6 +244,24 @@ td strong{color:var(--ink);font-weight:700}
     <div class="brand-div"></div>
     <div class="brand-text"><h1>Dispo-Zentrale</h1><div class="sub">Auftragsverwaltung</div></div>
   </div>
+  <div class="tabs">
+    <button class="tab active" data-tab="fremd">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M3 7l9-4 9 4M5 21V11l7-3 7 3v10M9 21V14M15 21V14"/></svg>
+        Fremdfirmen <span class="cnt" id="cntF">0</span>
+      </button>
+      <button class="tab" data-tab="sundern">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 17l10 5 10-5M2 12l10 5 10-5M12 2L2 7l10 5 10-5-10-5z"/></svg>
+        Sundern <span class="cnt" id="cntS">0</span>
+      </button>
+      <button class="tab" data-tab="overview">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        Tagesübersicht
+      </button>
+      <button class="tab" data-tab="alle">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        Alle Aufträge <span class="cnt" id="cntAlle">0</span>
+      </button>
+  </div>
   <div class="hdr-actions">
     <div class="conn" id="conn"><span class="conn-dot"></span><span id="connTxt">Verbinde…</span></div>
     <button class="bih" onclick="openSMModal()" title="Schachtmeister verwalten" style="margin-right:2px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></button>
@@ -259,24 +277,6 @@ td strong{color:var(--ink);font-weight:700}
   </div>
 </header>
 
-<div class="tabs">
-  <button class="tab active" data-tab="fremd">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M3 7l9-4 9 4M5 21V11l7-3 7 3v10M9 21V14M15 21V14"/></svg>
-    Fremdfirmen <span class="cnt" id="cntF">0</span>
-  </button>
-  <button class="tab" data-tab="sundern">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 17l10 5 10-5M2 12l10 5 10-5M12 2L2 7l10 5 10-5-10-5z"/></svg>
-    Sundern <span class="cnt" id="cntS">0</span>
-  </button>
-  <button class="tab" data-tab="overview">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-    Tagesübersicht
-  </button>
-  <button class="tab" data-tab="alle">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-    Alle Aufträge <span class="cnt" id="cntAlle">0</span>
-  </button>
-</div>
 
 <div class="container view active" id="view-fremd">
   <div class="panel" id="panelF">
