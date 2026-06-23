@@ -283,6 +283,7 @@ td strong{color:var(--ink);font-weight:700}
     <div class="pt"><span class="nl">Neuer Fremdfirmen-Auftrag</span><span class="eb">Bearbeiten-Modus</span></div>
     <form id="formF">
       <div class="fg"><label>Firmenname <span class="req">*</span></label><input type="text" name="firmenname" placeholder="z.B. Ossenberg" required></div>
+      <div class="fg"><label>Auftragsnummer</label><input type="text" name="auftragsnummerF" placeholder="z.B. 5515"></div>
       <div class="fg"><label>Baustelle <span class="req">*</span></label><input type="text" name="baustelle" placeholder="z.B. Balve" required></div>
       <div class="fg"><label>Material <span class="req">*</span></label>
         <div class="rg"><label><input type="radio" name="material" value="Asphalt" required> Asphalt</label><label><input type="radio" name="material" value="Strassenbaustoffe"> Straßenbaustoffe</label></div>
@@ -336,7 +337,7 @@ td strong{color:var(--ink);font-weight:700}
     </div>
     <div class="tw">
       <table id="tblF" style="display:none">
-        <thead><tr><th>Kunde</th><th>Baustelle</th><th>Material</th><th>Sorte</th><th>Menge</th><th>Fzg-Typ</th><th>Anz.</th><th>Fahrzeuge</th><th>Fahrer</th><th>Datum</th><th>Uhrzeit</th><th>Bemerkung</th><th></th></tr></thead>
+        <thead><tr><th>Kunde</th><th>Auftr.-Nr.</th><th>Baustelle</th><th>Material</th><th>Sorte</th><th>Menge</th><th>Fzg-Typ</th><th>Anz.</th><th>Fahrzeuge</th><th>Fahrer</th><th>Datum</th><th>Uhrzeit</th><th>Bemerkung</th><th></th></tr></thead>
         <tbody id="bodyF"></tbody>
       </table>
       <div id="emptyF" class="empty"><div class="ico">📋</div><h3>Noch keine Aufträge</h3><p>Erstelle den ersten Eintrag über das Formular</p></div>
@@ -503,7 +504,7 @@ td strong{color:var(--ink);font-weight:700}
       <div class="tw">
         <table id="tblAlleF" style="display:none">
           <thead><tr>
-            <th>Datum</th><th>Kunde</th><th>Baustelle</th><th>Material</th>
+            <th>Datum</th><th>Kunde</th><th>Auftr.-Nr.</th><th>Baustelle</th><th>Material</th>
             <th>Sorte</th><th>Menge</th><th>Fzg-Typ</th><th>Fahrzeuge</th>
             <th>Fahrer</th><th>Uhrzeit</th><th>Bemerkung</th><th></th>
           </tr></thead>
@@ -897,7 +898,7 @@ function clearTags(prefix){['V','D'].forEach(s=>{tags[prefix+s]=[];renderTags(pr
 // ===== FORMS =====
 document.getElementById('formF').addEventListener('submit',e=>{
   e.preventDefault();const f=e.target;
-  const order={firmenname:f.firmenname.value.trim(),baustelle:f.baustelle.value.trim(),material:f.material.value,sorte:f.sorte.value.trim(),menge:f.menge.value.trim(),abholung:f.abholung.value,uhrzeit:f.uhrzeit.value.trim(),bemerkung:f.bemerkung.value.trim(),vehicleTypes:[...tags.FT],anzahl:f.anzahlF?f.anzahlF.value.trim():'',vehicles:[...tags.FV],drivers:[...tags.FD],createdAt:firebase.database.ServerValue.TIMESTAMP};
+  const order={firmenname:f.firmenname.value.trim(),auftragsnummerF:f.auftragsnummerF.value.trim(),baustelle:f.baustelle.value.trim(),material:f.material.value,sorte:f.sorte.value.trim(),menge:f.menge.value.trim(),abholung:f.abholung.value,uhrzeit:f.uhrzeit.value.trim(),bemerkung:f.bemerkung.value.trim(),vehicleTypes:[...tags.FT],anzahl:f.anzahlF?f.anzahlF.value.trim():'',vehicles:[...tags.FV],drivers:[...tags.FD],createdAt:firebase.database.ServerValue.TIMESTAMP};
   if(editingId.fremd!==null){fremdRef.child(editingId.fremd).update(order).then(()=>{cancelEdit('fremd');showToast('Auftrag aktualisiert','amber')}).catch(err=>showToast('Fehler: '+err.message,'amber'));return}
   fremdRef.child(Date.now().toString()).set(order).then(()=>{f.reset();f.abholung.value=todayISO;clearTags('F');showToast('Fremdfirmen-Auftrag angelegt','success')}).catch(err=>showToast('Fehler: '+err.message,'amber'));
 });
@@ -957,6 +958,7 @@ window.sendMail=function(type,id){
   body+='\n----------------------------------------\n';
   if(type==='fremd'){
     body+=`KUNDE          : ${order.firmenname}\n`;
+    if(order.auftragsnummerF)body+=`AUFTRAGS-NR.   : ${order.auftragsnummerF}\n`;
     body+=`BAUSTELLE      : ${order.baustelle}\n`;
     body+=`MATERIAL       : ${order.material}\n`;
     body+=`SORTE          : ${order.sorte}\n`;
@@ -1015,7 +1017,7 @@ function renderF(){
   const t=document.getElementById('tblF'),e=document.getElementById('emptyF');
   if(!list.length){t.style.display='none';e.style.display='block';return}
   t.style.display='table';e.style.display='none';
-  document.getElementById('bodyF').innerHTML=list.map(o=>`<tr data-id="${o.id}"${editingId.fremd===o.id?' class="er"':''}><td><strong>${esc(o.firmenname)}</strong></td><td>${esc(o.baustelle)}</td><td><span class="badge ${o.material==='Strassenbaustoffe'?'sb':''}">${esc(o.material)}</span></td><td>${esc(o.sorte)}</td><td>${esc(o.menge)}</td><td>${pills(o.vehicleTypes)}</td><td>${esc(o.anzahl)}</td><td>${pills(o.vehicles)}</td><td>${pills(o.drivers)}</td><td>${fmtDate(o.abholung)}</td><td>${esc(o.uhrzeit)}</td><td>${esc(o.bemerkung)}</td><td>${ra('fremd',o.id)}</td></tr>`).join('');
+  document.getElementById('bodyF').innerHTML=list.map(o=>`<tr data-id="${o.id}"${editingId.fremd===o.id?' class="er"':''}><td><strong>${esc(o.firmenname)}</strong></td><td>${esc(o.auftragsnummerF)}</td><td>${esc(o.baustelle)}</td><td><span class="badge ${o.material==='Strassenbaustoffe'?'sb':''}">${esc(o.material)}</span></td><td>${esc(o.sorte)}</td><td>${esc(o.menge)}</td><td>${pills(o.vehicleTypes)}</td><td>${esc(o.anzahl)}</td><td>${pills(o.vehicles)}</td><td>${pills(o.drivers)}</td><td>${fmtDate(o.abholung)}</td><td>${esc(o.uhrzeit)}</td><td>${esc(o.bemerkung)}</td><td>${ra('fremd',o.id)}</td></tr>`).join('');
 }
 
 function renderS(){
@@ -1082,7 +1084,7 @@ window.clearList=function(type){
 
 window.exportF=function(){
   const l=getFilt('fremd');if(!l.length){showToast('Keine Auftraege');return}
-  dlXlsx({'Fremdfirma':l.map(o=>({'Kunde':o.firmenname,'Baustelle':o.baustelle,'Material':o.material,'Sorte':o.sorte,'Menge':o.menge,'Fzg-Typ':(o.vehicleTypes||[]).join(', '),'Anzahl':o.anzahl||'','Fahrzeuge':(o.vehicles||[]).join(', '),'Fahrer':(o.drivers||[]).join(', '),'Datum':fmtDate(o.abholung),'Uhrzeit':o.uhrzeit,'Bemerkung':o.bemerkung}))},'Dispo_Fremdfirmen');showToast('Excel exportiert','success');
+  dlXlsx({'Fremdfirma':l.map(o=>({'Kunde':o.firmenname,'AuftrNr':o.auftragsnummerF,'Baustelle':o.baustelle,'Material':o.material,'Sorte':o.sorte,'Menge':o.menge,'Fzg-Typ':(o.vehicleTypes||[]).join(', '),'Anzahl':o.anzahl||'','Fahrzeuge':(o.vehicles||[]).join(', '),'Fahrer':(o.drivers||[]).join(', '),'Datum':fmtDate(o.abholung),'Uhrzeit':o.uhrzeit,'Bemerkung':o.bemerkung}))},'Dispo_Fremdfirmen');showToast('Excel exportiert','success');
 };
 window.exportS=function(){
   const l=getFilt('sundern');if(!l.length){showToast('Keine Auftraege');return}
@@ -1091,7 +1093,7 @@ window.exportS=function(){
 window.exportBoth=function(){
   if(!data.fremd.length&&!data.sundern.length){showToast('Keine Auftraege');return}
   const sheets={};
-  if(data.fremd.length)sheets['Fremdfirma']=data.fremd.map(o=>({'Kunde':o.firmenname,'Baustelle':o.baustelle,'Material':o.material,'Sorte':o.sorte,'Menge':o.menge,'Fzg-Typ':(o.vehicleTypes||[]).join(', '),'Anzahl':o.anzahl||'','Fahrzeuge':(o.vehicles||[]).join(', '),'Fahrer':(o.drivers||[]).join(', '),'Datum':fmtDate(o.abholung),'Uhrzeit':o.uhrzeit,'Bemerkung':o.bemerkung}));
+  if(data.fremd.length)sheets['Fremdfirma']=data.fremd.map(o=>({'Kunde':o.firmenname,'AuftrNr':o.auftragsnummerF,'Baustelle':o.baustelle,'Material':o.material,'Sorte':o.sorte,'Menge':o.menge,'Fzg-Typ':(o.vehicleTypes||[]).join(', '),'Anzahl':o.anzahl||'','Fahrzeuge':(o.vehicles||[]).join(', '),'Fahrer':(o.drivers||[]).join(', '),'Datum':fmtDate(o.abholung),'Uhrzeit':o.uhrzeit,'Bemerkung':o.bemerkung}));
   if(data.sundern.length)sheets['Sundern']=data.sundern.map(o=>({'Schachtmeister':o.schachtmeister,'BstNr':o.baustellennummer,'AuftrNr':o.auftragsnummer,'Baustelle':o.baustelle,'Fzg-Typ':(o.vehicleTypes||[]).join(', '),'Anzahl':o.anzahl,'Fahrzeuge':(o.vehicles||[]).join(', '),'Fahrer':(o.drivers||[]).join(', '),'Material':o.material,'Sorte':o.sorte,'Menge':o.menge,'Datum':fmtDate(o.datum),'Uhrzeit':o.uhrzeit,'Bemerkung':o.bemerkung}));
   dlXlsx(sheets,'Hilgenroth_Dispo');showToast('Gesamt-Export erstellt','success');
 };
@@ -1155,6 +1157,7 @@ function renderAlle(){
       <tr data-id="${o.id}" class="${editingId.fremd===o.id?'er':''}">
         <td>${getDateLabel(o.abholung)}</td>
         <td><strong>${esc(o.firmenname)}</strong></td>
+        <td>${esc(o.auftragsnummerF)}</td>
         <td>${esc(o.baustelle)}</td>
         <td><span class="badge ${o.material==='Strassenbaustoffe'?'sb':''}">${esc(o.material)}</span></td>
         <td>${esc(o.sorte)}</td>
