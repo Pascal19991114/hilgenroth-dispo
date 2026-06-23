@@ -194,6 +194,26 @@ td strong{color:var(--ink);font-weight:700}
 .ov-empty{text-align:center;padding:60px 20px;color:var(--ink3)}
 .ov-empty .ico{font-size:48px;margin-bottom:16px;opacity:.3}
 .ov-empty h3{font-size:15px;font-weight:700;color:var(--ink2);margin-bottom:4px}
+
+.sm-phone{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--grn-s);border:1px solid #b5d9c2;border-radius:var(--rs);font-size:13px;font-weight:700;color:var(--grn);margin-top:-8px;margin-bottom:14px;display:none}
+.sm-phone svg{flex-shrink:0}
+.fleet-mgmt.sm{grid-template-columns:1fr}
+.sm-row{display:grid;grid-template-columns:1fr 160px 28px;gap:6px;align-items:center;padding:7px 10px;border-bottom:1px solid var(--line);font-size:12px;font-weight:600}
+.sm-row:last-child{border-bottom:none}
+.sm-row span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sm-row .ph{color:var(--ink3);font-weight:500}
+.sm-row button{background:none;color:var(--brand);font-size:15px;font-weight:700;width:24px;height:24px;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;border:none;cursor:pointer;flex-shrink:0}
+.sm-row button:hover{background:var(--brand-s)}
+.sm-add{display:grid;grid-template-columns:1fr 160px auto;gap:6px;margin-top:8px}
+.sm-add input{padding:8px 10px;border:1px solid var(--line);border-radius:var(--rs);font-size:12px;font-family:inherit;font-weight:600;background:var(--surf)}
+.sm-add input:focus{outline:none;border-color:var(--brand);background:white}
+.sm-add button{padding:8px 14px;background:var(--ink);color:white;border:none;border-radius:var(--rs);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
+.sm-add button:hover{background:var(--brand)}
+
+
+.bst-chip{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--blu-s);border:1px solid #b5c9e8;border-radius:var(--rs);font-size:13px;font-weight:700;color:var(--blu);margin-top:-8px;margin-bottom:14px;display:none}
+.bst-chip svg{flex-shrink:0}
+
 @media print{
   body{background:white;padding:0}
   header,.tabs,.toast,.btn-p,.btn-s,.nb,.ndp{display:none!important}
@@ -226,6 +246,8 @@ td strong{color:var(--ink);font-weight:700}
   </div>
   <div class="hdr-actions">
     <div class="conn" id="conn"><span class="conn-dot"></span><span id="connTxt">Verbinde…</span></div>
+    <button class="bih" onclick="openSMModal()" title="Schachtmeister verwalten" style="margin-right:2px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></button>
+    <button class="bih" onclick="openBstModal()" title="Baustellen verwalten" style="margin-right:2px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg></button>
     <button class="bih" onclick="openFleet()" title="Fahrzeuge & Fahrer verwalten">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
     </button>
@@ -343,11 +365,28 @@ td strong{color:var(--ink);font-weight:700}
 <option>Rapp, L.</option>
 <option>Pötter, Uwe</option></select>
       </div>
+      <div class="sm-phone" id="smPhoneChip">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.63 3.45 2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.29 6.29l.95-.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        <span id="smPhoneText"></span>
+      </div>
       <div class="r2">
+        <div class="fg"><label>Baustellennummer</label>
+          <select name="baustellennummer" id="selBstNr" onchange="onBstNrChange(this.value)">
+            <option value="">-- Nummer wählen --</option>
+          </select>
+        </div>
         <div class="fg"><label>Auftragsnummer</label><input type="text" name="auftragsnummer" placeholder="z.B. 5515"></div>
         <div class="fg"><label>Datum <span class="req">*</span></label><input type="date" name="datum" required></div>
       </div>
-      <div class="fg"><label>Baustelle</label><input type="text" name="baustelle" placeholder="z.B. Wirtschaftsweg"></div>
+      <div class="bst-chip" id="bstChip">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span id="bstChipText"></span>
+      </div>
+      <div class="fg"><label>Baustelle</label>
+        <select name="baustelle" id="selBstName" onchange="onBstNameChange(this.value)">
+          <option value="">-- Baustelle wählen --</option>
+        </select>
+      </div>
       <div class="r2">
         <div class="fg"><label>Fahrzeug-Typ <span style="font-weight:400;color:var(--ink3);font-size:11px;">(mehrere möglich)</span></label>
           <div class="ms"><div class="ms-tags" id="msTagsST"></div>
@@ -400,7 +439,7 @@ td strong{color:var(--ink);font-weight:700}
     </div>
     <div class="tw">
       <table id="tblS" style="display:none">
-        <thead><tr><th>Schachtmeister</th><th>Auftr.-Nr.</th><th>Baustelle</th><th>Fzg-Typ(en)</th><th>Anz.</th><th>Fahrzeuge</th><th>Fahrer</th><th>Material</th><th>Sorte</th><th>Menge</th><th>Datum</th><th>Uhrzeit</th><th>Bemerkung</th><th></th></tr></thead>
+        <thead><tr><th>Schachtmeister</th><th>Bst.-Nr.</th><th>Auftr.-Nr.</th><th>Baustelle</th><th>Fzg-Typ(en)</th><th>Anz.</th><th>Fahrzeuge</th><th>Fahrer</th><th>Material</th><th>Sorte</th><th>Menge</th><th>Datum</th><th>Uhrzeit</th><th>Bemerkung</th><th></th></tr></thead>
         <tbody id="bodyS"></tbody>
       </table>
       <div id="emptyS" class="empty"><div class="ico">🚧</div><h3>Noch keine Aufträge</h3><p>Erstelle den ersten Eintrag über das Formular</p></div>
@@ -487,7 +526,7 @@ td strong{color:var(--ink);font-weight:700}
       <div class="tw">
         <table id="tblAlleS" style="display:none">
           <thead><tr>
-            <th>Datum</th><th>Schachtmeister</th><th>Auftr.-Nr.</th><th>Baustelle</th>
+            <th>Datum</th><th>Schachtmeister</th><th>Bst.-Nr.</th><th>Auftr.-Nr.</th><th>Baustelle</th>
             <th>Fzg-Typ</th><th>Anz.</th><th>Fahrzeuge</th><th>Fahrer</th>
             <th>Material</th><th>Sorte</th><th>Menge</th><th>Uhrzeit</th><th>Bemerkung</th><th></th>
           </tr></thead>
@@ -522,15 +561,78 @@ td strong{color:var(--ink);font-weight:700}
   </div>
 </div>
 
+
+
+<div class="mb" id="bstModal" onclick="if(event.target===this)closeBstModal()">
+  <div class="modal">
+    <h2>Baustellen verwalten</h2>
+    <p>Baustellennummer und Baustellen-Name sind gekoppelt – bei Eingabe der Nummer wird der Name automatisch ausgefüllt und umgekehrt.</p>
+    <div class="fleet-mgmt sm">
+      <div class="fleet-col">
+        <h4>🏗 Baustellen</h4>
+        <div class="fleet-list" id="bstList" style="max-height:320px"></div>
+        <div class="sm-add">
+          <input type="text" id="newBstNr" placeholder="Bst.-Nr. z.B. 5513" style="max-width:140px">
+          <input type="text" id="newBstName" placeholder="Baustellen-Name">
+          <button type="button" onclick="addBst()">+ Hinzufügen</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-a"><button type="button" class="btn-p" onclick="closeBstModal()">Fertig</button></div>
+  </div>
+</div>
+
+<div class="mb" id="smModal" onclick="if(event.target===this)closeSMModal()">
+  <div class="modal">
+    <h2>Schachtmeister verwalten</h2>
+    <p>Änderungen sind sofort für alle Nutzer sichtbar.</p>
+    <div class="fleet-mgmt sm">
+      <div class="fleet-col">
+        <h4>👷 Schachtmeister &amp; Telefonnummern</h4>
+        <div class="fleet-list" id="smList" style="max-height:320px"></div>
+        <div class="sm-add">
+          <input type="text" id="newSMName" placeholder="Name, Vorname">
+          <input type="text" id="newSMPhone" placeholder="0170/1234567">
+          <button type="button" onclick="addSM()">+ Hinzufügen</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-a"><button type="button" class="btn-p" onclick="closeSMModal()">Fertig</button></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
 // ===== DEFAULTS (Fallback wenn Firebase offline) =====
+
+
+const DFLT_BST = [];  // initially empty – fill via Baustellen verwalten
+
+const DFLT_SM = [
+  {name:"Feldhahn, J.",         phone:"0170/9222245"},
+  {name:"Liedhegener, Gerd",    phone:"0170/2130682"},
+  {name:"Schauerte, A.",        phone:"0170/2130680"},
+  {name:"Hansknecht, J.",       phone:"0170/3252790"},
+  {name:"Schulte-Borghoff, R.", phone:"0172/2064592"},
+  {name:"Hoffmann, Beppo",      phone:"0173/1648730"},
+  {name:"Gründler, M.",         phone:"0171/6871495"},
+  {name:"Brechmann, F.",        phone:"0171/5647895"},
+  {name:"Gerade, Chr.",         phone:"0170/5729432"},
+  {name:"Harmann, Chr.",        phone:"0151/12399853"},
+  {name:"Kampmeier, Markus",    phone:"0170/5831793"},
+  {name:"Schulte, A.",          phone:"0151/59265992"},
+  {name:"Schulte, L.",          phone:"0160/95626668"},
+  {name:"Rapp, L.",             phone:"0160/91245615"},
+  {name:"Pötter, Uwe",          phone:""},
+];
 const DFLT_V = ["RH-140", "RH-620", "RH-630", "RH-860", "RH-985", "RH-266", "RF-773", "PW-840", "KI-5296"];
 const DFLT_D = ["Dominik OW24", "Funke AF 234 Frank", "Funke AF 560 Dietmar", "Funke JV 15 Manuel", "Roth RW 500 Paul", "Trecker H.Schulte", "Albers Stefan", "Hubertus Schulte", "Schwingenheuer", "Stratmann", "Meinecke", "Merkel", "Albert Kulikov", "Juri Golikov", "Basist", "5xSL", "5x SL"];
 
 // ===== STATE =====
 let data={fremd:[],sundern:[]};
+let schachtmeister=[...DFLT_SM];
+let baustellen=[...DFLT_BST];
 let tags={FV:[],FD:[],SV:[],SD:[],ST:[],FT:[]};
 let fleet={vehicles:[...DFLT_V],drivers:[...DFLT_D]};
 let editingId={fremd:null,sundern:null};
@@ -578,7 +680,27 @@ const db=firebase.database();
 const fremdRef=db.ref('fremd');
 const sundernRef=db.ref('sundern');
 const fleetRef=db.ref('fleet');
+const smRef=db.ref('schachtmeister');
+const bstRef=db.ref('baustellen');
 const connRef=db.ref('.info/connected');
+
+
+
+bstRef.on('value',s=>{
+  const v=s.val();
+  if(v&&Array.isArray(v)&&v.length){baustellen=v;}
+  else if(!s.val()){/* start empty */}
+  rebuildBstSelects();
+  renderBstModal();
+});
+
+smRef.on('value',s=>{
+  const v=s.val();
+  if(v&&Array.isArray(v)&&v.length){schachtmeister=v;}
+  else if(!s.val()){smRef.set(DFLT_SM);}
+  rebuildSMSelect();
+  renderSMModal();
+});
 
 connRef.on('value',s=>{
   const el=document.getElementById('conn');
@@ -603,6 +725,123 @@ function objArr(obj){if(!obj)return[];return Object.entries(obj).map(([id,item])
 function activeTab(){return document.querySelector('.tab.active')?.dataset.tab}
 
 // ===== SELECTS AUFBAUEN =====
+
+
+function rebuildBstSelects(){
+  const emptyNr='<option value="">-- Nummer wählen --</option>';
+  const emptyName='<option value="">-- Baustelle wählen --</option>';
+  const optsNr=baustellen.map(b=>`<option value="${esc(b.nr)}">${esc(b.nr)} – ${esc(b.name)}</option>`).join('');
+  const optsName=baustellen.map(b=>`<option value="${esc(b.name)}">${esc(b.name)} (${esc(b.nr)})</option>`).join('');
+  const selNr=document.getElementById('selBstNr');
+  const selName=document.getElementById('selBstName');
+  if(!selNr||!selName)return;
+  const curNr=selNr.value; const curName=selName.value;
+  selNr.innerHTML=emptyNr+optsNr;
+  selName.innerHTML=emptyName+optsName;
+  if(curNr)selNr.value=curNr;
+  if(curName)selName.value=curName;
+}
+function onBstNrChange(nr){
+  const b=baustellen.find(x=>x.nr===nr);
+  const chip=document.getElementById('bstChip');
+  const chipTxt=document.getElementById('bstChipText');
+  const selName=document.getElementById('selBstName');
+  if(b){
+    selName.value=b.name;
+    chip.style.display='flex'; chipTxt.textContent=b.nr+' · '+b.name;
+  } else {
+    selName.value='';
+    chip.style.display='none'; chipTxt.textContent='';
+  }
+}
+function onBstNameChange(name){
+  const b=baustellen.find(x=>x.name===name);
+  const chip=document.getElementById('bstChip');
+  const chipTxt=document.getElementById('bstChipText');
+  const selNr=document.getElementById('selBstNr');
+  if(b){
+    selNr.value=b.nr;
+    chip.style.display='flex'; chipTxt.textContent=b.nr+' · '+b.name;
+  } else {
+    selNr.value='';
+    chip.style.display='none'; chipTxt.textContent='';
+  }
+}
+function renderBstModal(){
+  document.getElementById('bstList').innerHTML=baustellen.length===0
+    ? '<div style="padding:12px;color:var(--ink3);font-size:12px;text-align:center">Noch keine Baustellen angelegt</div>'
+    : baustellen.map((b,i)=>`
+    <div class="sm-row">
+      <span title="${esc(b.nr)}" style="max-width:100px">${esc(b.nr)}</span>
+      <span class="ph" style="flex:1" title="${esc(b.name)}">${esc(b.name)}</span>
+      <button onclick="removeBst(${i})" title="Entfernen">×</button>
+    </div>`).join('');
+}
+function openBstModal(){document.getElementById('bstModal').classList.add('show');renderBstModal();}
+function closeBstModal(){document.getElementById('bstModal').classList.remove('show');}
+function addBst(){
+  const nr=document.getElementById('newBstNr').value.trim();
+  const name=document.getElementById('newBstName').value.trim();
+  if(!nr||!name){showToast('Nummer und Name eingeben','amber');return;}
+  if(baustellen.find(b=>b.nr===nr)){showToast('Nummer bereits vorhanden','amber');return;}
+  baustellen=[...baustellen,{nr,name}].sort((a,b)=>a.nr.localeCompare(b.nr,undefined,{numeric:true}));
+  bstRef.set(baustellen).then(()=>{
+    document.getElementById('newBstNr').value='';
+    document.getElementById('newBstName').value='';
+    renderBstModal();rebuildBstSelects();
+    showToast('Baustelle hinzugefügt','success');
+  }).catch(e=>showToast('Fehler: '+e.message,'amber'));
+}
+function removeBst(i){
+  if(!confirm('Baustelle "'+baustellen[i].nr+' – '+baustellen[i].name+'" entfernen?'))return;
+  baustellen=baustellen.filter((_,j)=>j!==i);
+  bstRef.set(baustellen).then(()=>{renderBstModal();rebuildBstSelects();showToast('Entfernt','success');}).catch(e=>showToast('Fehler: '+e.message,'amber'));
+}
+
+function rebuildSMSelect(){
+  const sel=document.querySelector('#formS [name="schachtmeister"]');
+  const cur=sel.value;
+  sel.innerHTML='<option value="">-- bitte wählen --</option>'+schachtmeister.map(s=>`<option${s.name===cur?' selected':''}>${esc(s.name)}</option>`).join('');
+  // refresh phone chip
+  const sm=schachtmeister.find(s=>s.name===sel.value);
+  const chip=document.getElementById('smPhoneChip');
+  const txt=document.getElementById('smPhoneText');
+  if(sm&&sm.phone){chip.style.display='flex';txt.textContent=sm.phone;}
+  else{chip.style.display='none';}
+}
+function renderSMModal(){
+  document.getElementById('smList').innerHTML=schachtmeister.map((s,i)=>`
+    <div class="sm-row">
+      <span title="${esc(s.name)}">${esc(s.name)}</span>
+      <span class="ph">${esc(s.phone||'—')}</span>
+      <button onclick="removeSM(${i})" title="Entfernen">×</button>
+    </div>`).join('');
+}
+function openSMModal(){document.getElementById('smModal').classList.add('show');renderSMModal();}
+function closeSMModal(){document.getElementById('smModal').classList.remove('show');}
+function addSM(){
+  const n=document.getElementById('newSMName').value.trim();
+  const p=document.getElementById('newSMPhone').value.trim();
+  if(!n){showToast('Name eingeben','amber');return;}
+  schachtmeister=[...schachtmeister,{name:n,phone:p}];
+  smRef.set(schachtmeister).then(()=>{document.getElementById('newSMName').value='';document.getElementById('newSMPhone').value='';renderSMModal();rebuildSMSelect();showToast('Schachtmeister hinzugefügt','success');}).catch(e=>showToast('Fehler: '+e.message,'amber'));
+}
+function removeSM(i){
+  if(!confirm('Schachtmeister "'+schachtmeister[i].name+'" entfernen?'))return;
+  schachtmeister=schachtmeister.filter((_,j)=>j!==i);
+  smRef.set(schachtmeister).then(()=>{renderSMModal();rebuildSMSelect();showToast('Entfernt','success');}).catch(e=>showToast('Fehler: '+e.message,'amber'));
+}
+
+
+document.querySelector('#formS [name="schachtmeister"]').addEventListener('change',function(){
+  const name=this.value;
+  const sm=schachtmeister.find(s=>s.name===name);
+  const chip=document.getElementById('smPhoneChip');
+  const txt=document.getElementById('smPhoneText');
+  if(sm&&sm.phone){chip.style.display='flex';txt.textContent=sm.phone;}
+  else{chip.style.display='none';txt.textContent='';}
+});
+
 function rebuildSelects(){
   const vOpts=fleet.vehicles.map(v=>`<option>${esc(v)}</option>`).join('');
   const dOpts=fleet.drivers.map(d=>`<option>${esc(d)}</option>`).join('');
@@ -665,7 +904,7 @@ document.getElementById('formF').addEventListener('submit',e=>{
 
 document.getElementById('formS').addEventListener('submit',e=>{
   e.preventDefault();const f=e.target;
-  const order={schachtmeister:f.schachtmeister.value,auftragsnummer:f.auftragsnummer.value.trim(),baustelle:f.baustelle.value.trim(),vehicleTypes:[...tags.ST],anzahl:f.anzahl.value.trim(),vehicles:[...tags.SV],drivers:[...tags.SD],material:f.material.value,sorte:f.sorte.value.trim(),menge:f.menge.value.trim(),datum:f.datum.value,uhrzeit:f.uhrzeit.value.trim(),bemerkung:f.bemerkung.value.trim(),createdAt:firebase.database.ServerValue.TIMESTAMP};
+  const order={schachtmeister:f.schachtmeister.value,baustellennummer:f.baustellennummer.value.trim(),auftragsnummer:f.auftragsnummer.value.trim(),baustelle:f.baustelle.value.trim(),vehicleTypes:[...tags.ST],anzahl:f.anzahl.value.trim(),vehicles:[...tags.SV],drivers:[...tags.SD],material:f.material.value,sorte:f.sorte.value.trim(),menge:f.menge.value.trim(),datum:f.datum.value,uhrzeit:f.uhrzeit.value.trim(),bemerkung:f.bemerkung.value.trim(),createdAt:firebase.database.ServerValue.TIMESTAMP};
   if(editingId.sundern!==null){sundernRef.child(editingId.sundern).update(order).then(()=>{cancelEdit('sundern');showToast('Auftrag aktualisiert','amber')}).catch(err=>showToast('Fehler: '+err.message,'amber'));return}
   sundernRef.child(Date.now().toString()).set(order).then(()=>{f.reset();f.datum.value=todayISO;clearTags('S');showToast('Sundern-Auftrag angelegt','success')}).catch(err=>showToast('Fehler: '+err.message,'amber'));
 });
@@ -729,6 +968,7 @@ window.sendMail=function(type,id){
     if(order.bemerkung)body+=`BEMERKUNG      : ${order.bemerkung}\n`;
   }else{
     body+=`SCHACHTMEISTER : ${order.schachtmeister}\n`;
+    if(order.baustellennummer)body+=`BAUSTELLEN-NR. : ${order.baustellennummer}\n`;
     if(order.auftragsnummer)body+=`AUFTRAGS-NR.   : ${order.auftragsnummer}\n`;
     if(order.baustelle)body+=`BAUSTELLE      : ${order.baustelle}\n`;
     if(order.fahrzeugTyp)body+=`FAHRZEUG-TYP   : ${order.fahrzeugTyp}\n`;
@@ -784,7 +1024,7 @@ function renderS(){
   const t=document.getElementById('tblS'),e=document.getElementById('emptyS');
   if(!list.length){t.style.display='none';e.style.display='block';return}
   t.style.display='table';e.style.display='none';
-  document.getElementById('bodyS').innerHTML=list.map(o=>`<tr data-id="${o.id}"${editingId.sundern===o.id?' class="er"':''}><td><strong>${esc(o.schachtmeister)}</strong></td><td>${esc(o.auftragsnummer)}</td><td>${esc(o.baustelle)}</td><td>${pills(o.vehicleTypes)}</td><td>${esc(o.anzahl)}</td><td>${pills(o.vehicles)}</td><td>${pills(o.drivers)}</td><td><span class="badge ${o.material==='Strassenbaustoffe'?'sb':''}">${esc(o.material)}</span></td><td>${esc(o.sorte)}</td><td>${esc(o.menge)}</td><td>${fmtDate(o.datum)}</td><td>${esc(o.uhrzeit)}</td><td>${esc(o.bemerkung)}</td><td>${ra('sundern',o.id)}</td></tr>`).join('');
+  document.getElementById('bodyS').innerHTML=list.map(o=>`<tr data-id="${o.id}"${editingId.sundern===o.id?' class="er"':''}><td><strong>${esc(o.schachtmeister)}</strong></td><td>${esc(o.baustellennummer)}</td><td>${esc(o.auftragsnummer)}</td><td>${esc(o.baustelle)}</td><td>${pills(o.vehicleTypes)}</td><td>${esc(o.anzahl)}</td><td>${pills(o.vehicles)}</td><td>${pills(o.drivers)}</td><td><span class="badge ${o.material==='Strassenbaustoffe'?'sb':''}">${esc(o.material)}</span></td><td>${esc(o.sorte)}</td><td>${esc(o.menge)}</td><td>${fmtDate(o.datum)}</td><td>${esc(o.uhrzeit)}</td><td>${esc(o.bemerkung)}</td><td>${ra('sundern',o.id)}</td></tr>`).join('');
 }
 
 // ===== OVERVIEW =====
@@ -809,7 +1049,7 @@ function renderOv(){
   document.getElementById('ovCntF').textContent=fl.length;
 
   document.getElementById('ovBodyS').innerHTML=sl.length===0?'<div class="ov-empty"><div class="ico">🚧</div><h3>Keine Sundern-Touren</h3></div>':sl.map(o=>`<div class="tour-row"><div class="tour-grid">
-    <div><div class="tg-label">Schachtmeister</div><div class="t-name">${esc(o.schachtmeister)}</div>${o.auftragsnummer?`<div class="t-sub">Nr. ${esc(o.auftragsnummer)}</div>`:''}</div>
+    <div><div class="tg-label">Schachtmeister</div><div class="t-name">${esc(o.schachtmeister)}</div>${o.baustellennummer?`<div class="t-sub">Bst. ${esc(o.baustellennummer)}</div>`:''} ${o.auftragsnummer?`<div class="t-sub">Nr. ${esc(o.auftragsnummer)}</div>`:''}</div>
     <div><div class="tg-label">Baustelle</div><div class="t-bst">${o.baustelle?esc(o.baustelle):'—'}</div></div>
     <div><div class="tg-label">Fahrzeuge & Fahrer</div>${(o.vehicleTypes&&o.vehicleTypes.length)?`<div style="font-weight:700;margin-bottom:4px">${o.vehicleTypes.map(esc).join(', ')}${o.anzahl?' x'+esc(o.anzahl):''}</div>`:''} ${pills(o.vehicles)} ${pills(o.drivers)}</div>
     <div><div class="tg-label">Material</div><span class="badge ${o.material==='Strassenbaustoffe'?'sb':''}">${esc(o.material)}</span><div style="margin-top:6px;font-weight:600">${[o.sorte,o.menge].filter(Boolean).join(' · ')}</div></div>
@@ -852,7 +1092,7 @@ window.exportBoth=function(){
   if(!data.fremd.length&&!data.sundern.length){showToast('Keine Auftraege');return}
   const sheets={};
   if(data.fremd.length)sheets['Fremdfirma']=data.fremd.map(o=>({'Kunde':o.firmenname,'Baustelle':o.baustelle,'Material':o.material,'Sorte':o.sorte,'Menge':o.menge,'Fzg-Typ':(o.vehicleTypes||[]).join(', '),'Anzahl':o.anzahl||'','Fahrzeuge':(o.vehicles||[]).join(', '),'Fahrer':(o.drivers||[]).join(', '),'Datum':fmtDate(o.abholung),'Uhrzeit':o.uhrzeit,'Bemerkung':o.bemerkung}));
-  if(data.sundern.length)sheets['Sundern']=data.sundern.map(o=>({'Schachtmeister':o.schachtmeister,'AuftrNr':o.auftragsnummer,'Baustelle':o.baustelle,'Fzg-Typ':(o.vehicleTypes||[]).join(', '),'Anzahl':o.anzahl,'Fahrzeuge':(o.vehicles||[]).join(', '),'Fahrer':(o.drivers||[]).join(', '),'Material':o.material,'Sorte':o.sorte,'Menge':o.menge,'Datum':fmtDate(o.datum),'Uhrzeit':o.uhrzeit,'Bemerkung':o.bemerkung}));
+  if(data.sundern.length)sheets['Sundern']=data.sundern.map(o=>({'Schachtmeister':o.schachtmeister,'BstNr':o.baustellennummer,'AuftrNr':o.auftragsnummer,'Baustelle':o.baustelle,'Fzg-Typ':(o.vehicleTypes||[]).join(', '),'Anzahl':o.anzahl,'Fahrzeuge':(o.vehicles||[]).join(', '),'Fahrer':(o.drivers||[]).join(', '),'Material':o.material,'Sorte':o.sorte,'Menge':o.menge,'Datum':fmtDate(o.datum),'Uhrzeit':o.uhrzeit,'Bemerkung':o.bemerkung}));
   dlXlsx(sheets,'Hilgenroth_Dispo');showToast('Gesamt-Export erstellt','success');
 };
 function dlXlsx(sheets,base){
@@ -937,6 +1177,7 @@ function renderAlle(){
       <tr data-id="${o.id}" class="${editingId.sundern===o.id?'er':''}">
         <td>${getDateLabel(o.datum)}</td>
         <td><strong>${esc(o.schachtmeister)}</strong></td>
+        <td>${esc(o.baustellennummer)}</td>
         <td>${esc(o.auftragsnummer)}</td>
         <td>${esc(o.baustelle)}</td>
         <td>${pills(o.vehicleTypes)}</td>
