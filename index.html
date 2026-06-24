@@ -214,6 +214,35 @@ td strong{color:var(--ink);font-weight:700}
 .bst-chip{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--blu-s);border:1px solid #b5c9e8;border-radius:var(--rs);font-size:13px;font-weight:700;color:var(--blu);margin-top:-8px;margin-bottom:14px;display:none}
 .bst-chip svg{flex-shrink:0}
 
+
+.lief-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;background:var(--grn-s);border:1px solid #5DCAA5;border-radius:var(--rs);font-size:11px;font-weight:700;color:var(--grn);cursor:pointer;font-family:inherit;transition:all .15s}
+.lief-btn:hover{background:var(--grn);color:white}
+.lief-hist-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;background:var(--blu-s);border:1px solid #85B7EB;border-radius:var(--rs);font-size:11px;font-weight:700;color:var(--blu);cursor:pointer;font-family:inherit;transition:all .15s}
+.lief-hist-btn:hover{background:var(--blu);color:white}
+.lief-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+.lief-table th{text-align:left;padding:8px 10px;background:var(--surf);border-bottom:1px solid var(--line);font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:.08em;color:var(--ink3)}
+.lief-table td{padding:9px 10px;border-bottom:1px solid var(--line);color:var(--ink2);font-weight:500;vertical-align:middle}
+.lief-table tr:last-child td{border-bottom:none}
+.lief-table tbody tr:hover td{background:var(--surf)}
+.lief-mat-head{font-size:13px;font-weight:800;color:var(--ink);padding:14px 0 6px;border-bottom:2px solid var(--line);margin-bottom:0;display:flex;justify-content:space-between;align-items:center}
+.lief-mat-head .cnt-badge{background:var(--grn);color:white;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700}
+.lief-empty{text-align:center;padding:24px;color:var(--ink3);font-size:13px}
+.modal.wide{max-width:820px}
+
+
+.sorten-row{display:grid;grid-template-columns:1fr 110px 80px 90px 60px;gap:8px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--line);font-size:12px;font-weight:600}
+.sorten-row:last-child{border-bottom:none}
+.sorten-row input{padding:5px 8px;border:1px solid var(--line);border-radius:var(--rs);font-size:12px;font-family:inherit;font-weight:600;background:var(--surf);width:100%}
+.sorten-row input:focus{outline:none;border-color:var(--brand);background:white}
+.sorten-row .row-btns{display:flex;gap:4px;justify-content:flex-end}
+.sorten-row .row-btns button{padding:4px 8px;font-size:11px;font-weight:700;border-radius:var(--rs);cursor:pointer;font-family:inherit;border:1px solid var(--line);background:var(--surf);color:var(--ink2);transition:all .15s}
+.sorten-row .row-btns .edit-btn:hover{background:var(--amb-s);color:var(--amb);border-color:var(--amb)}
+.sorten-row .row-btns .save-btn{background:var(--grn-s);color:var(--grn);border-color:#5DCAA5}
+.sorten-row .row-btns .save-btn:hover{background:var(--grn);color:white}
+.sorten-row .row-btns .del-btn:hover{background:var(--brand-s);color:var(--brand);border-color:var(--brand)}
+.sorten-head{display:grid;grid-template-columns:1fr 110px 80px 90px 60px;gap:8px;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);background:var(--surf);border-bottom:1px solid var(--line)}
+.modal.xl{max-width:700px}
+
 @media print{
   body{background:white;padding:0}
   header,.tabs,.toast,.btn-p,.btn-s,.nb,.ndp{display:none!important}
@@ -234,6 +263,57 @@ td strong{color:var(--ink);font-weight:700}
 .date-badge.today{background:var(--grn-s);color:var(--grn)}
 .date-badge.future{background:var(--blu-s);color:var(--blu)}
 .alle-search-hl{background:rgba(209,26,44,.12);border-radius:2px}
+
+/* ===== LAGER ===== */
+.lager-hero{background:linear-gradient(135deg,#1a2d1f 0%,#2a3d30 100%);color:white;border-radius:var(--rl);padding:24px 32px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;box-shadow:var(--sh-md);position:relative;overflow:hidden}
+.lager-hero::before{content:"";position:absolute;top:0;right:0;width:300px;height:100%;background:radial-gradient(circle at top right,rgba(31,122,63,.25),transparent 70%);pointer-events:none}
+.lager-hero-left{position:relative;z-index:1}
+.lager-hero-title{font-size:22px;font-weight:800;letter-spacing:-.02em;margin-bottom:4px}
+.lager-hero-sub{font-size:12px;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.12em;font-weight:600}
+.lager-stats{display:flex;gap:12px;flex-wrap:wrap;position:relative;z-index:1}
+.lager-stat{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:var(--rs);padding:10px 18px;text-align:center;min-width:80px}
+.lager-stat-val{font-size:22px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.lager-stat-lbl{font-size:10px;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.1em;margin-top:3px;font-weight:600}
+.lager-stat.warn .lager-stat-val{color:#EF9F27}
+.lager-stat.krit .lager-stat-val{color:#E24B4A}
+.lager-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:24px}
+.lager-card{background:var(--bg-e);border:1px solid var(--line);border-radius:var(--rl);padding:18px 20px;transition:border-color .15s,box-shadow .15s}
+.lager-card:hover{box-shadow:var(--sh-md)}
+.lager-card.warn{border-left:3px solid #EF9F27;padding-left:17px}
+.lager-card.krit{border-left:3px solid #E24B4A;padding-left:17px}
+.lager-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.lager-card-name{font-size:14px;font-weight:700;color:var(--ink);line-height:1.3}
+.lager-card-sub{font-size:11px;color:var(--ink3);margin-top:2px;font-weight:500}
+.lager-badge{font-size:10px;padding:3px 9px;border-radius:5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+.lager-badge.ok{background:var(--grn-s);color:var(--grn)}
+.lager-badge.warn{background:#FAEEDA;color:#854F0B}
+.lager-badge.krit{background:#FCEBEB;color:#A32D2D}
+.lager-bar-wrap{background:var(--line);border-radius:4px;height:8px;margin-bottom:10px;overflow:hidden}
+.lager-bar-fill{height:100%;border-radius:4px;transition:width .5s ease}
+.lager-bar-ok{background:var(--grn)}
+.lager-bar-warn{background:#EF9F27}
+.lager-bar-krit{background:#E24B4A}
+.lager-card-foot{display:flex;justify-content:space-between;align-items:flex-end}
+.lager-meta{text-align:right;font-size:11px;color:var(--ink3);font-weight:600;line-height:1.7}
+.warn-banner{background:#FCEBEB;border:1px solid #F7C1C1;border-radius:var(--rl);padding:16px 20px;margin-bottom:20px;display:none}
+.warn-banner-title{font-size:13px;font-weight:700;color:#A32D2D;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.warn-banner-item{font-size:13px;color:#791F1F;padding:3px 0;display:flex;align-items:center;gap:8px}
+.lager-sec-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--ink3);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.alert-panel{background:var(--bg-e);border:1px solid var(--line);border-radius:var(--rl);padding:20px 24px;margin-bottom:20px;box-shadow:var(--sh-sm)}
+.alert-row{display:grid;grid-template-columns:1fr 170px auto;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}
+.alert-row:last-child{border-bottom:none}
+.alert-mat{font-weight:700;color:var(--ink)}
+.alert-thresh{font-size:12px;color:var(--ink3);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.alert-thresh input{width:65px;font-size:12px;padding:4px 8px;text-align:center;border:1px solid var(--line);border-radius:var(--rs);background:var(--surf);font-family:inherit;font-weight:600;color:var(--ink)}
+.alert-thresh input:focus{outline:none;border-color:var(--brand);background:white}
+.notif-btns{display:flex;gap:6px}
+.notif-btn{font-size:11px;padding:4px 10px;border:1px solid var(--line);border-radius:var(--rs);cursor:pointer;background:var(--surf);color:var(--ink3);font-weight:600;font-family:inherit;transition:all .15s}
+.notif-btn.on-email{background:var(--blu-s);color:var(--blu);border-color:#85B7EB}
+.notif-btn.on-sms{background:var(--grn-s);color:var(--grn);border-color:#5DCAA5}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.lager-ist-input{width:80px;font-size:15px;padding:6px 8px;text-align:center;border:1px solid var(--line);border-radius:var(--rs);background:var(--surf);font-family:inherit;font-weight:700;color:var(--ink)}
+.lager-ist-input:focus{outline:none;border-color:var(--brand);background:white}
+@media(max-width:600px){.lager-grid{grid-template-columns:1fr}.alert-row{grid-template-columns:1fr}.contact-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -260,6 +340,10 @@ td strong{color:var(--ink);font-weight:700}
       <button class="tab" data-tab="alle">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
         Alle Aufträge <span class="cnt" id="cntAlle">0</span>
+      </button>
+      <button class="tab" data-tab="lager">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Lager <span class="cnt" id="cntLagerWarn">0</span>
       </button>
   </div>
   <div class="hdr-actions">
@@ -542,6 +626,66 @@ td strong{color:var(--ink);font-weight:700}
   </div>
 </div>
 
+
+<!-- LAGER -->
+<div class="container full view" id="view-lager">
+  <div class="lager-hero">
+    <div class="lager-hero-left">
+      <div class="lager-hero-title">&#128230; Lagerbestand &mdash; Asphaltanlage</div>
+      <div class="lager-hero-sub">Edelsplitte &amp; Zuschlagstoffe &middot; Stand: <span id="lagerStand">&mdash;</span></div>
+    </div>
+    <div class="lager-stats">
+      <div class="lager-stat"><div class="lager-stat-val" id="lsTotal">0</div><div class="lager-stat-lbl">Gesamt (t)</div></div>
+      <div class="lager-stat"><div class="lager-stat-val">8</div><div class="lager-stat-lbl">Materialien</div></div>
+      <div class="lager-stat warn"><div class="lager-stat-val" id="lsWarn">0</div><div class="lager-stat-lbl">Warnungen</div></div>
+      <div class="lager-stat krit"><div class="lager-stat-val" id="lsKrit">0</div><div class="lager-stat-lbl">Kritisch</div></div>
+    </div>
+  </div>
+
+  <div class="warn-banner" id="warnBanner">
+    <div class="warn-banner-title">&#9888;&#65039; Best&auml;nde unter Warnschwelle</div>
+    <div id="warnBannerList"></div>
+  </div>
+
+  <div class="lager-sec-title">
+    F&uuml;llst&auml;nde je Material
+    <div style="display:flex;gap:8px">
+    <button class="btn-s" onclick="openSortenModal()" style="text-transform:none;font-size:12px">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+      Sorten verwalten
+    </button>
+    <button class="btn-s" onclick="openLiefHistorie()" style="text-transform:none;font-size:12px;background:var(--blu-s);color:var(--blu);border-color:#85B7EB">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      Lieferhistorie
+    </button>
+    <button class="btn-s" onclick="saveLagerToFirebase()" style="text-transform:none;font-size:12px">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      Best&auml;nde speichern
+    </button>
+    </div>
+  </div>
+  <div class="lager-grid" id="lagerGrid"></div>
+
+  <div class="alert-panel">
+    <div class="lager-sec-title" style="margin-bottom:0;border-bottom:none;padding-bottom:0">
+      &#128276; Benachrichtigungen &amp; Warnschwellen
+    </div>
+    <div style="font-size:12px;color:var(--ink3);margin:6px 0 16px">E-Mail oder SMS wenn ein Bestand die Warnschwelle unterschreitet.</div>
+    <div class="contact-grid" style="margin-top:0;padding-top:0;border-top:none;margin-bottom:16px">
+      <div class="fg" style="margin:0"><label>E-Mail f&uuml;r Warnmeldungen</label><input type="email" id="lagerEmail" placeholder="z.B. dispo@hilgenroth.de"></div>
+      <div class="fg" style="margin:0"><label>Handynummer (SMS)</label><input type="tel" id="lagerSMS" placeholder="z.B. +4917612345678"></div>
+    </div>
+    <div style="border-top:1px solid var(--line);padding-top:14px">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);margin-bottom:10px">Warnschwelle &amp; Alarmierung je Material</div>
+      <div id="alertRows"></div>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn-p" style="flex:0 0 auto;padding:11px 22px" onclick="saveLagerSettings()">Einstellungen speichern</button>
+      <button class="btn-s" onclick="testLagerNotification()">Test-E-Mail senden</button>
+    </div>
+  </div>
+</div>
+
 <div class="mb" id="fleetModal" onclick="if(event.target===this)closeFleet()">
   <div class="modal">
     <h2>Fahrzeuge & Fahrer verwalten</h2>
@@ -599,6 +743,78 @@ td strong{color:var(--ink);font-weight:700}
       </div>
     </div>
     <div class="modal-a"><button type="button" class="btn-p" onclick="closeSMModal()">Fertig</button></div>
+  </div>
+</div>
+
+
+
+<!-- SORTEN VERWALTEN MODAL -->
+<div class="mb" id="sortenModal" onclick="if(event.target===this)closeSortenModal()">
+  <div class="modal xl">
+    <h2>⚙ Sorten verwalten</h2>
+    <p>Materialien anlegen, bearbeiten oder löschen. Änderungen wirken sich sofort auf alle Lagerkarten aus.</p>
+    <div style="border:1px solid var(--line);border-radius:var(--rs);overflow:hidden;margin-bottom:16px">
+      <div class="sorten-head">
+        <span>Name</span><span>Hersteller</span><span>Max (t)</span><span>Warnschwelle (t)</span><span></span>
+      </div>
+      <div id="sortenList" style="max-height:340px;overflow-y:auto"></div>
+    </div>
+    <div style="background:var(--surf);border:1px solid var(--line);border-radius:var(--rs);padding:12px 14px">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);margin-bottom:10px">+ Neue Sorte</div>
+      <div class="sorten-row" style="background:transparent;border:none;padding:0">
+        <input type="text" id="newSorteName" placeholder="Name z.B. Edelsplitt 0/2">
+        <input type="text" id="newSorteHer"  placeholder="Hersteller">
+        <input type="number" id="newSorteMax" placeholder="120" min="1">
+        <input type="number" id="newSorteDw"  placeholder="30"  min="1">
+        <div class="row-btns"><button class="save-btn" onclick="addSorte()">+ Hinzufügen</button></div>
+      </div>
+    </div>
+    <div class="modal-a"><button type="button" class="btn-p" onclick="closeSortenModal()">Fertig</button></div>
+  </div>
+</div>
+
+<!-- LIEFERUNG HINZUFÜGEN MODAL -->
+<div class="mb" id="liefModal" onclick="if(event.target===this)closeLiefModal()">
+  <div class="modal">
+    <h2>Lieferung erfassen</h2>
+    <p id="liefModalSub" style="font-weight:700;color:var(--grn)"></p>
+    <div class="r2">
+      <div class="fg"><label>Lieferscheinnummer</label><input type="text" id="liefNr" placeholder="z.B. LS-2026-001"></div>
+      <div class="fg"><label>Datum</label><input type="date" id="liefDatum"></div>
+    </div>
+    <div class="r2">
+      <div class="fg"><label>Kennzeichen LKW</label><input type="text" id="liefKfz" placeholder="z.B. RH-140" list="kfzList" autocomplete="off"><datalist id="kfzList"></datalist></div>
+      <div class="fg"><label>Lieferant</label>
+        <select id="liefFirma">
+          <option value="">-- Firma wählen --</option>
+          <option>Mimber</option>
+          <option>Ebel</option>
+          <option>WGU Berge</option>
+          <option>Mineral Berge</option>
+          <option>Calcit</option>
+          <option>Halbeswig</option>
+          <option>Lhoist</option>
+          <option>Lanwehr</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg"><label>Menge (t) <span class="req">*</span></label><input type="number" id="liefMenge" placeholder="z.B. 25" min="0" step="0.5"></div>
+    <div class="modal-a">
+      <button type="button" class="btn-c" style="display:block" onclick="closeLiefModal()">Abbrechen</button>
+      <button type="button" class="btn-p" onclick="saveLieferung()">Lieferung speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- LIEFERHISTORIE MODAL -->
+<div class="mb" id="liefHistModal" onclick="if(event.target===this)closeLiefHistorie()">
+  <div class="modal wide">
+    <h2>📦 Lieferhistorie — Asphaltanlage</h2>
+    <p>Alle erfassten Wareneingänge nach Material sortiert.</p>
+    <div style="max-height:60vh;overflow-y:auto" id="liefHistBody">
+      <div class="lief-empty">Noch keine Lieferungen erfasst.</div>
+    </div>
+    <div class="modal-a"><button type="button" class="btn-p" onclick="closeLiefHistorie()">Schließen</button></div>
   </div>
 </div>
 
@@ -662,7 +878,7 @@ document.querySelectorAll('.tab').forEach(tab=>{
     document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
     tab.classList.add('active');
     document.getElementById('view-'+tab.dataset.tab).classList.add('active');
-    if(tab.dataset.tab==='overview')renderOv();if(tab.dataset.tab==='alle')renderAlle();
+    if(tab.dataset.tab==='overview')renderOv();if(tab.dataset.tab==='alle')renderAlle();if(tab.dataset.tab==='lager')renderLager();
   });
 });
 
@@ -932,6 +1148,13 @@ window.startEdit=function(type,id){
   document.querySelectorAll('tbody tr').forEach(r=>r.classList.remove('er'));
   const row=document.querySelector(`tr[data-id="${id}"]`);if(row)row.classList.add('er');
   panel.scrollIntoView({behavior:'smooth',block:'start'});
+  if(type==='sundern'){
+    const smF=schachtmeister.find(s=>s.name===order.schachtmeister);
+    const pChip=document.getElementById('smPhoneChip');
+    const pTxt=document.getElementById('smPhoneText');
+    if(smF&&smF.phone){pChip.style.display='flex';pTxt.textContent=smF.phone;}else{pChip.style.display='none';}
+    onBstNrChange(order.baustellennummer||'');
+  }
   if(activeTab()==='alle')renderAlle();
   showToast('Auftrag wird bearbeitet','amber');
 };
@@ -1088,7 +1311,7 @@ window.exportF=function(){
 };
 window.exportS=function(){
   const l=getFilt('sundern');if(!l.length){showToast('Keine Auftraege');return}
-  dlXlsx({'Sundern':l.map(o=>({'Schachtmeister':o.schachtmeister,'AuftrNr':o.auftragsnummer,'Baustelle':o.baustelle,'Fzg-Typ':(o.vehicleTypes||[]).join(', '),'Anzahl':o.anzahl,'Fahrzeuge':(o.vehicles||[]).join(', '),'Fahrer':(o.drivers||[]).join(', '),'Material':o.material,'Sorte':o.sorte,'Menge':o.menge,'Datum':fmtDate(o.datum),'Uhrzeit':o.uhrzeit,'Bemerkung':o.bemerkung}))},'Dispo_Sundern');showToast('Excel exportiert','success');
+  dlXlsx({'Sundern':l.map(o=>({'Schachtmeister':o.schachtmeister,'BstNr':o.baustellennummer,'AuftrNr':o.auftragsnummer,'Baustelle':o.baustelle,'Fzg-Typ':(o.vehicleTypes||[]).join(', '),'Anzahl':o.anzahl,'Fahrzeuge':(o.vehicles||[]).join(', '),'Fahrer':(o.drivers||[]).join(', '),'Material':o.material,'Sorte':o.sorte,'Menge':o.menge,'Datum':fmtDate(o.datum),'Uhrzeit':o.uhrzeit,'Bemerkung':o.bemerkung}))},'Dispo_Sundern');showToast('Excel exportiert','success');
 };
 window.exportBoth=function(){
   if(!data.fremd.length&&!data.sundern.length){showToast('Keine Auftraege');return}
@@ -1200,6 +1423,337 @@ function renderAlle(){
 document.getElementById('alleSearch').addEventListener('input',renderAlle);
 document.getElementById('alleFilter').addEventListener('change',renderAlle);
 document.getElementById('alleType').addEventListener('change',renderAlle);
+
+
+// ===== LAGER =====
+const DFLT_LAGER_MAT = [
+  {id:'es_02',   name:'Edelsplitt 0/2',         her:'Diabas',    max:120, dw:30},
+  {id:'es_25',   name:'Edelsplitt 2/5',         her:'Diabas',    max:120, dw:30},
+  {id:'es_58',   name:'Edelsplitt 5/8',         her:'Diabas',    max:120, dw:30},
+  {id:'es_811',  name:'Edelsplitt 8/11',        her:'Diabas',    max:150, dw:40},
+  {id:'es_1116', name:'Edelsplitt 11/16',       her:'Granit',    max:150, dw:40},
+  {id:'es_1622', name:'Edelsplitt 16/22',       her:'Granit',    max:150, dw:40},
+  {id:'brs_03',  name:'Brechsand 0/3',          her:'Kalkstein', max:80,  dw:20},
+  {id:'fst',     name:'Füller / Kalksteinmehl', her:'',      max:60,  dw:15},
+];
+let LAGER_MAT=[...DFLT_LAGER_MAT];
+let lagerData={};
+let lagerLieferungen={};
+let _liefActiveMatId=null;
+let lagerKennzeichen=[];
+let _sortenEditId=null;
+let lagerEmail='';
+let lagerSMS='';
+const lagerRef=db.ref('lager');
+const liefRef=db.ref('lagerLieferungen');
+const lagerMatRef=db.ref('lagerMaterialien');
+const lagerKfzRef=db.ref('lagerKennzeichen');
+const lagerSettRef=db.ref('lagerSettings');
+
+
+lagerMatRef.on('value',s=>{
+  const v=s.val();
+  if(v&&Array.isArray(v)&&v.length){
+    LAGER_MAT=v;
+  } else if(!s.val()){
+    lagerMatRef.set(DFLT_LAGER_MAT);
+    LAGER_MAT=[...DFLT_LAGER_MAT];
+  }
+  // ensure lagerData has entry for every material
+  LAGER_MAT.forEach(m=>{if(!lagerData[m.id])lagerData[m.id]={ist:0,warn:m.dw,email:true,sms:false};});
+  if(activeTab()==='lager')renderLager();
+  updateLagerBadge();
+  renderSortenList();
+});
+
+lagerKfzRef.on('value',s=>{
+  lagerKennzeichen=s.val()||[];
+  updateKfzDatalist();
+});
+
+liefRef.on('value',s=>{
+  lagerLieferungen=s.val()||{};
+});
+
+lagerRef.on('value',s=>{
+  const v=s.val()||{};
+  LAGER_MAT.forEach(m=>{
+    if(v[m.id]){
+      if(v[m.id].ist!==undefined)lagerData[m.id].ist=v[m.id].ist;
+      if(v[m.id].warn!==undefined)lagerData[m.id].warn=v[m.id].warn;
+      if(v[m.id].email!==undefined)lagerData[m.id].email=v[m.id].email;
+      if(v[m.id].sms!==undefined)lagerData[m.id].sms=v[m.id].sms;
+    }
+  });
+  if(activeTab()==='lager')renderLager();
+  updateLagerBadge();
+});
+
+lagerSettRef.on('value',s=>{
+  const v=s.val()||{};
+  lagerEmail=v.email||'';lagerSMS=v.sms||'';
+  const e=document.getElementById('lagerEmail');const s2=document.getElementById('lagerSMS');
+  if(e&&!e.value)e.value=lagerEmail;if(s2&&!s2.value)s2.value=lagerSMS;
+});
+
+function getLagerSt(ist,warn){if(ist<=warn*0.5)return'krit';if(ist<=warn)return'warn';return'ok';}
+
+function renderLager(){
+  const now=new Date();
+  const el=document.getElementById('lagerStand');
+  if(el)el.textContent=String(now.getDate()).padStart(2,'0')+'.'+String(now.getMonth()+1).padStart(2,'0')+'.'+now.getFullYear()+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')+' Uhr';
+  let total=0,wc=0,kc=0;const wi=[];
+  const grid=document.getElementById('lagerGrid');if(!grid)return;
+  grid.innerHTML='';
+  LAGER_MAT.forEach(m=>{
+    const ld=lagerData[m.id];
+    const ist=Number(ld.ist)||0;const warn=Number(ld.warn)||m.dw;
+    const pct=Math.min(100,Math.round(ist/m.max*100));
+    const st=getLagerSt(ist,warn);
+    total+=ist;
+    if(st==='warn'){wc++;wi.push({m,ist,warn,st});}
+    if(st==='krit'){kc++;wi.push({m,ist,warn,st});}
+    const bt=st==='ok'?'OK':st==='warn'?'Warnung':'Kritisch';
+    const card=document.createElement('div');
+    card.className='lager-card'+(st!=='ok'?' '+st:'');
+        card.innerHTML=`<div class="lager-card-top"><div><div class="lager-card-name">${esc(m.name)}</div>${m.her?`<div class="lager-card-sub">${esc(m.her)}</div>`:''}</div><span class="lager-badge ${st}">${bt}</span></div>`
+      +`<div class="lager-bar-wrap"><div class="lager-bar-fill lager-bar-${st}" style="width:${pct}%"></div></div>`
+      +`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><button class="lief-btn" onclick="openLiefModal('${m.id}','${esc(m.name)}')">+ Lieferung</button><button class="lief-hist-btn" onclick="openLiefHistorie('${m.id}')">📋 Historie</button></div>`
+      +`<div class="lager-card-foot">`
+      +`<div style="display:flex;align-items:center;gap:8px"><input class="lager-ist-input" type="number" min="0" max="${m.max}" value="${ist}" onchange="updateLagerIst('${m.id}',this.value)" title="Bestand eingeben"> <span style="font-size:13px;color:var(--ink3);font-weight:600">t</span></div>`
+      +`<div class="lager-meta">von ${m.max} t max<br>${pct}% befüllt<br><span style="color:${st==='ok'?'var(--ink3)':st==='warn'?'#854F0B':'#A32D2D'}">Warnschwelle: ${warn} t</span></div>`
+      +`</div>`;
+    grid.appendChild(card);
+  });
+  const tEl=document.getElementById('lsTotal');const wEl=document.getElementById('lsWarn');const kEl=document.getElementById('lsKrit');
+  if(tEl)tEl.textContent=total;if(wEl)wEl.textContent=wc;if(kEl)kEl.textContent=kc;
+  const banner=document.getElementById('warnBanner');const bl=document.getElementById('warnBannerList');
+  if(banner&&bl){if(wi.length){banner.style.display='block';bl.innerHTML=wi.map(({m,ist,warn,st})=>'<div class="warn-banner-item">'+(st==='krit'?'&#128308; <strong>KRITISCH</strong>':'&#128993; <strong>Warnung</strong>')+' &mdash; '+esc(m.name)+': noch <strong>'+ist+' t</strong> (Schwelle: '+warn+' t)</div>').join('');}else{banner.style.display='none';}}
+  renderAlertRows();updateLagerBadge();
+}
+
+function updateLagerBadge(){
+  let cnt=0;LAGER_MAT.forEach(m=>{const ld=lagerData[m.id];if(getLagerSt(Number(ld.ist)||0,Number(ld.warn)||m.dw)!=='ok')cnt++;});
+  const b=document.getElementById('cntLagerWarn');
+  if(b){b.textContent=cnt;if(cnt>0){b.style.background='var(--brand)';b.style.color='white';}else{b.style.background='';b.style.color='';}}
+}
+
+window.updateLagerIst=function(id,val){
+  lagerData[id].ist=Math.max(0,Number(val)||0);
+  let total=0,wc=0,kc=0;const wi=[];
+  LAGER_MAT.forEach(m=>{const ld=lagerData[m.id];const ist=Number(ld.ist)||0;const warn=Number(ld.warn)||m.dw;total+=ist;const st=getLagerSt(ist,warn);if(st==='warn'){wc++;wi.push({m,ist,warn,st});}if(st==='krit'){kc++;wi.push({m,ist,warn,st});}});
+  const tEl=document.getElementById('lsTotal');const wEl=document.getElementById('lsWarn');const kEl=document.getElementById('lsKrit');
+  if(tEl)tEl.textContent=total;if(wEl)wEl.textContent=wc;if(kEl)kEl.textContent=kc;
+  const banner=document.getElementById('warnBanner');const bl=document.getElementById('warnBannerList');
+  if(banner&&bl){if(wi.length){banner.style.display='block';bl.innerHTML=wi.map(({m,ist,warn,st})=>'<div class="warn-banner-item">'+(st==='krit'?'&#128308; <strong>KRITISCH</strong>':'&#128993; <strong>Warnung</strong>')+' &mdash; '+esc(m.name)+': noch <strong>'+ist+' t</strong> (Schwelle: '+warn+' t)</div>').join('');}else{banner.style.display='none';}}
+  updateLagerBadge();
+};
+
+window.saveLagerToFirebase=function(){
+  const p={};LAGER_MAT.forEach(m=>{const ld=lagerData[m.id];p[m.id]={ist:Number(ld.ist)||0,warn:Number(ld.warn)||m.dw,email:ld.email!==false,sms:ld.sms===true};});
+  lagerRef.set(p).then(()=>showToast('Bestände gespeichert','success')).catch(e=>showToast('Fehler: '+e.message,'amber'));
+};
+
+window.saveLagerSettings=function(){
+  const email=document.getElementById('lagerEmail')?.value?.trim()||'';
+  const sms=document.getElementById('lagerSMS')?.value?.trim()||'';
+  lagerEmail=email;lagerSMS=sms;
+  saveLagerToFirebase();
+  lagerSettRef.set({email,sms}).then(()=>showToast('Einstellungen gespeichert','success')).catch(e=>showToast('Fehler: '+e.message,'amber'));
+};
+
+window.testLagerNotification=function(){
+  const email=document.getElementById('lagerEmail')?.value?.trim()||lagerEmail;
+  if(!email){showToast('Bitte E-Mail eintragen','amber');return;}
+  const wm=LAGER_MAT.filter(m=>getLagerSt(Number(lagerData[m.id].ist)||0,Number(lagerData[m.id].warn)||m.dw)!=='ok');
+  const subj='Lagerwarnung — Asphaltanlage Hilgenroth';
+  let body='LAGERBESTAND WARNUNG — HILGENROTH\n\n';
+  if(!wm.length){body+='Alle Bestände im grünen Bereich.\n';}
+  else{wm.forEach(m=>{const ld=lagerData[m.id];const st=getLagerSt(Number(ld.ist)||0,Number(ld.warn)||m.dw);body+=(st==='krit'?'KRITISCH':'WARNUNG')+': '+m.name+'\n  Bestand: '+ld.ist+' t  |  Warnschwelle: '+ld.warn+' t\n\n';});}
+  body+='Bitte Nachlieferung veranlassen.\nHilgenroth Dispo-Zentrale';
+  window.location.href='mailto:'+encodeURIComponent(email)+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);
+  showToast('E-Mail wird geöffnet…','blue');
+};
+
+window.toggleNotif=function(id,type){lagerData[id][type]=!lagerData[id][type];renderAlertRows();};
+window.updateThresh=function(id,val){lagerData[id].warn=Math.max(0,Number(val)||0);updateLagerBadge();};
+
+function renderAlertRows(){
+  const cont=document.getElementById('alertRows');if(!cont)return;
+  cont.innerHTML=LAGER_MAT.map(m=>{
+    const ld=lagerData[m.id];const eOn=ld.email!==false;const sOn=ld.sms===true;
+        return `<div class="alert-row"><div><div class="alert-mat">${esc(m.name)}</div></div>`
+      +`<div class="alert-thresh">Warnen ab <input type="number" min="0" max="${m.max}" value="${Number(ld.warn)||m.dw}" onchange="updateThresh('${m.id}',this.value)"> t</div>`
+      +`<div class="notif-btns"><button class="notif-btn ${eOn?'on-email':''}" onclick="toggleNotif('${m.id}','email')">E-Mail</button>`
+      +`<button class="notif-btn ${sOn?'on-sms':''}" onclick="toggleNotif('${m.id}','sms')">SMS</button></div></div>`;
+  }).join('');
+}
+
+window.openLiefModal=function(matId,matName){
+  _liefActiveMatId=matId;
+  document.getElementById('liefModalSub').textContent=matName;
+  document.getElementById('liefDatum').value=todayISO;
+  document.getElementById('liefNr').value='';
+  document.getElementById('liefKfz').value='';
+  document.getElementById('liefFirma').value='';
+  document.getElementById('liefMenge').value='';
+  document.getElementById('liefModal').classList.add('show');
+};
+window.closeLiefModal=function(){document.getElementById('liefModal').classList.remove('show');_liefActiveMatId=null;};
+
+window.saveLieferung=function(){
+  if(!_liefActiveMatId){closeLiefModal();return;}
+  const nr=document.getElementById('liefNr').value.trim();
+  const datum=document.getElementById('liefDatum').value;
+  const kfz=document.getElementById('liefKfz').value.trim();
+  const firma=document.getElementById('liefFirma').value;
+  const mengeRaw=document.getElementById('liefMenge').value.trim();
+  if(!nr||!datum||!firma||!mengeRaw){showToast('Alle Pflichtfelder ausfüllen (inkl. Menge)','amber');return;}
+  const mengeNum=Math.max(0,parseFloat(mengeRaw)||0);
+  const entry={lieferschein:nr,datum,kennzeichen:kfz,firma,menge:mengeRaw,createdAt:Date.now()};
+  // 1. Lieferung in Firebase speichern
+  liefRef.child(_liefActiveMatId).child(Date.now().toString()).set(entry)
+    .then(()=>{
+      // 2. Bestand automatisch erhöhen
+      if(mengeNum>0&&lagerData[_liefActiveMatId]){
+        const mat=LAGER_MAT.find(m=>m.id===_liefActiveMatId);
+        const maxVal=mat?mat.max:999;
+        lagerData[_liefActiveMatId].ist=Math.min(maxVal,
+          (Number(lagerData[_liefActiveMatId].ist)||0)+mengeNum);
+        // 3. Neuen Bestand in Firebase speichern
+        const p={};
+        LAGER_MAT.forEach(m=>{
+          const ld=lagerData[m.id];
+          p[m.id]={ist:Number(ld.ist)||0,warn:Number(ld.warn)||m.dw,email:ld.email!==false,sms:ld.sms===true};
+        });
+        return lagerRef.set(p);
+      }
+    })
+    .then(()=>{
+      saveKfzIfNew(kfz);
+      closeLiefModal();
+      renderLager(); // Karte sofort aktualisieren
+      showToast('Lieferung gespeichert — Bestand aktualisiert','success');
+    })
+    .catch(e=>showToast('Fehler: '+e.message,'amber'));
+};
+
+window.openLiefHistorie=function(matId){
+  renderLiefHistorie(matId||null);
+  document.getElementById('liefHistModal').classList.add('show');
+};
+window.closeLiefHistorie=function(){document.getElementById('liefHistModal').classList.remove('show');};
+
+function renderLiefHistorie(filterMatId){
+  const body=document.getElementById('liefHistBody');
+  const mats=filterMatId?LAGER_MAT.filter(m=>m.id===filterMatId):LAGER_MAT;
+  let html='';
+  mats.forEach(m=>{
+    const entries=lagerLieferungen[m.id]?Object.values(lagerLieferungen[m.id]).sort((a,b)=>b.createdAt-a.createdAt):[];
+    html+=`<div class="lief-mat-head">${esc(m.name)}<span class="cnt-badge">${entries.length}</span></div>`;
+    if(!entries.length){html+='<div class="lief-empty">Noch keine Lieferungen.</div>';}
+    else{
+      html+='<table class="lief-table"><thead><tr><th>Lieferschein</th><th>Datum</th><th>Firma</th><th>Kennzeichen</th><th>Menge</th></tr></thead><tbody>';
+      entries.forEach(e=>{
+        html+=`<tr><td><strong>${esc(e.lieferschein)}</strong></td><td>${fmtDate(e.datum)}</td><td>${esc(e.firma)}</td><td>${esc(e.kennzeichen||'—')}</td><td>${e.menge?esc(e.menge)+' t':'—'}</td></tr>`;
+      });
+      html+='</tbody></table>';
+    }
+  });
+  body.innerHTML=html||'<div class="lief-empty">Keine Daten.</div>';
+}
+
+
+// ===== SORTEN VERWALTEN =====
+window.openSortenModal=function(){renderSortenList();document.getElementById('sortenModal').classList.add('show');};
+window.closeSortenModal=function(){document.getElementById('sortenModal').classList.remove('show');_sortenEditId=null;};
+
+function renderSortenList(){
+  const el=document.getElementById('sortenList');if(!el)return;
+  if(!LAGER_MAT.length){el.innerHTML='<div style="padding:16px;color:var(--ink3);text-align:center;font-size:13px">Noch keine Sorten – füge unten eine hinzu.</div>';return;}
+  el.innerHTML=LAGER_MAT.map((m,i)=>{
+    if(_sortenEditId===m.id){
+      return `<div class="sorten-row" style="background:var(--amb-s)">
+        <input type="text"   id="seN_${m.id}" value="${esc(m.name)}" placeholder="Name">
+        <input type="text"   id="seH_${m.id}" value="${esc(m.her||'')}" placeholder="Hersteller">
+        <input type="number" id="seMax_${m.id}" value="${m.max}" min="1" placeholder="Max (t)">
+        <input type="number" id="seDw_${m.id}" value="${m.dw}" min="1" placeholder="Warnschwelle (t)">
+        <div class="row-btns">
+          <button class="save-btn" onclick="saveSorteEdit('${m.id}')">Speichern</button>
+          <button onclick="_sortenEditId=null;renderSortenList()">✕</button>
+        </div>
+      </div>`;
+    }
+    return `<div class="sorten-row">
+      <span title="${esc(m.name)}">${esc(m.name)}</span>
+      <span style="color:var(--ink3)">${esc(m.her||'—')}</span>
+      <span>${m.max} t</span>
+      <span>${m.dw} t</span>
+      <div class="row-btns">
+        <button class="edit-btn" onclick="startSorteEdit('${m.id}')">✎</button>
+        <button class="del-btn" onclick="deleteSorte('${m.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.startSorteEdit=function(id){_sortenEditId=id;renderSortenList();setTimeout(()=>{const el=document.getElementById('seN_'+id);if(el)el.focus();},50);};
+
+window.saveSorteEdit=function(id){
+  const name=document.getElementById('seN_'+id)?.value.trim();
+  const her=document.getElementById('seH_'+id)?.value.trim();
+  const max=parseInt(document.getElementById('seMax_'+id)?.value)||0;
+  const dw=parseInt(document.getElementById('seDw_'+id)?.value)||0;
+  if(!name||!max||!dw){showToast('Name, Max und Warnschwelle sind Pflichtfelder','amber');return;}
+  LAGER_MAT=LAGER_MAT.map(m=>m.id===id?{...m,name,her,max,dw}:m);
+  _sortenEditId=null;
+  lagerMatRef.set(LAGER_MAT)
+    .then(()=>{showToast('Sorte aktualisiert','success');renderLager();updateLagerBadge();})
+    .catch(e=>showToast('Fehler: '+e.message,'amber'));
+};
+
+window.addSorte=function(){
+  const name=document.getElementById('newSorteName').value.trim();
+  const her=document.getElementById('newSorteHer').value.trim();
+  const max=parseInt(document.getElementById('newSorteMax').value)||0;
+  const dw=parseInt(document.getElementById('newSorteDw').value)||0;
+  if(!name||!max||!dw){showToast('Name, Max und Warnschwelle ausfüllen','amber');return;}
+  const id='mat_'+Date.now();
+  const newMat={id,name,her,max,dw};
+  LAGER_MAT=[...LAGER_MAT,newMat];
+  if(!lagerData[id])lagerData[id]={ist:0,warn:dw,email:true,sms:false};
+  lagerMatRef.set(LAGER_MAT).then(()=>{
+    document.getElementById('newSorteName').value='';
+    document.getElementById('newSorteHer').value='';
+    document.getElementById('newSorteMax').value='';
+    document.getElementById('newSorteDw').value='';
+    renderSortenList();renderLager();updateLagerBadge();
+    showToast('Neue Sorte hinzugefügt','success');
+  }).catch(e=>showToast('Fehler: '+e.message,'amber'));
+};
+
+window.deleteSorte=function(id){
+  const mat=LAGER_MAT.find(m=>m.id===id);
+  if(!mat||!confirm('Sorte "'+mat.name+'" wirklich löschen? Lieferhistorie bleibt erhalten.'))return;
+  LAGER_MAT=LAGER_MAT.filter(m=>m.id!==id);
+  lagerMatRef.set(LAGER_MAT).then(()=>{
+    renderSortenList();renderLager();updateLagerBadge();
+    showToast('Sorte gelöscht','amber');
+  }).catch(e=>showToast('Fehler: '+e.message,'amber'));
+};
+
+// ===== KENNZEICHEN =====
+function updateKfzDatalist(){
+  const dl=document.getElementById('kfzList');
+  if(dl)dl.innerHTML=lagerKennzeichen.map(k=>`<option value="${esc(k)}">`).join('');
+}
+function saveKfzIfNew(kfz){
+  if(!kfz||lagerKennzeichen.includes(kfz))return;
+  const updated=[...lagerKennzeichen,kfz].sort();
+  lagerKfzRef.set(updated).catch(()=>{});
+}
+
+// ===== END LAGER =====
 
 function showToast(msg,v){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(v?' '+v:'');setTimeout(()=>t.classList.remove('show'),2200)}
 </script>
