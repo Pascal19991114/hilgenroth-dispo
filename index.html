@@ -311,8 +311,7 @@ td strong{color:var(--ink);font-weight:700}
 .notif-btn.on-email{background:var(--blu-s);color:var(--blu);border-color:#85B7EB}
 .notif-btn.on-sms{background:var(--grn-s);color:var(--grn);border-color:#5DCAA5}
 .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
-.lager-ist-input{width:80px;font-size:15px;padding:6px 8px;text-align:center;border:1px solid var(--line);border-radius:var(--rs);background:var(--surf);font-family:inherit;font-weight:700;color:var(--ink)}
-.lager-ist-input:focus{outline:none;border-color:var(--brand);background:white}
+.lager-ist-display{display:inline-flex;align-items:center;justify-content:center;min-width:70px;padding:8px 12px;background:var(--surf);border:1px solid var(--line);border-radius:var(--rs);font-size:18px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
 @media(max-width:600px){.lager-grid{grid-template-columns:1fr}.alert-row{grid-template-columns:1fr}.contact-grid{grid-template-columns:1fr}}
 </style>
 </head>
@@ -776,7 +775,7 @@ td strong{color:var(--ink);font-weight:700}
 <!-- LIEFERUNG HINZUFÜGEN MODAL -->
 <div class="mb" id="liefModal" onclick="if(event.target===this)closeLiefModal()">
   <div class="modal">
-    <h2>Lieferung erfassen</h2>
+    <h2 id="liefModalTitle">Lieferung erfassen</h2>
     <p id="liefModalSub" style="font-weight:700;color:var(--grn)"></p>
     <div class="r2">
       <div class="fg"><label>Lieferscheinnummer</label><input type="text" id="liefNr" placeholder="z.B. LS-2026-001"></div>
@@ -1440,6 +1439,9 @@ let LAGER_MAT=[...DFLT_LAGER_MAT];
 let lagerData={};
 let lagerLieferungen={};
 let _liefActiveMatId=null;
+let _liefEditKey=null;
+let _liefOldMenge=0;
+let _liefHistFilterId=null;
 let lagerKennzeichen=[];
 let _sortenEditId=null;
 let lagerEmail='';
@@ -1520,7 +1522,7 @@ function renderLager(){
       +`<div class="lager-bar-wrap"><div class="lager-bar-fill lager-bar-${st}" style="width:${pct}%"></div></div>`
       +`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><button class="lief-btn" onclick="openLiefModal('${m.id}','${esc(m.name)}')">+ Lieferung</button><button class="lief-hist-btn" onclick="openLiefHistorie('${m.id}')">📋 Historie</button></div>`
       +`<div class="lager-card-foot">`
-      +`<div style="display:flex;align-items:center;gap:8px"><input class="lager-ist-input" type="number" min="0" max="${m.max}" value="${ist}" onchange="updateLagerIst('${m.id}',this.value)" title="Bestand eingeben"> <span style="font-size:13px;color:var(--ink3);font-weight:600">t</span></div>`
+      +`<div style="display:flex;align-items:center;gap:10px"><span class="lager-ist-display">${ist}</span><span style="font-size:14px;color:var(--ink3);font-weight:700">t</span></div>`
       +`<div class="lager-meta">von ${m.max} t max<br>${pct}% befüllt<br><span style="color:${st==='ok'?'var(--ink3)':st==='warn'?'#854F0B':'#A32D2D'}">Warnschwelle: ${warn} t</span></div>`
       +`</div>`;
     grid.appendChild(card);
@@ -1591,15 +1593,40 @@ function renderAlertRows(){
 
 window.openLiefModal=function(matId,matName){
   _liefActiveMatId=matId;
+  _liefEditKey=null;
+  _liefOldMenge=0;
   document.getElementById('liefModalSub').textContent=matName;
   document.getElementById('liefDatum').value=todayISO;
   document.getElementById('liefNr').value='';
   document.getElementById('liefKfz').value='';
   document.getElementById('liefFirma').value='';
   document.getElementById('liefMenge').value='';
+  document.getElementById('liefModalTitle').textContent='Lieferung erfassen';
   document.getElementById('liefModal').classList.add('show');
 };
-window.closeLiefModal=function(){document.getElementById('liefModal').classList.remove('show');_liefActiveMatId=null;};
+
+window.openEditLieferung=function(matId,key){
+  const entry=lagerLieferungen[matId]&&lagerLieferungen[matId][key];
+  if(!entry)return;
+  _liefActiveMatId=matId;
+  _liefEditKey=key;
+  _liefOldMenge=parseFloat(entry.menge)||0;
+  const mat=LAGER_MAT.find(m=>m.id===matId);
+  document.getElementById('liefModalSub').textContent=mat?mat.name:'';
+  document.getElementById('liefModalTitle').textContent='Lieferung bearbeiten';
+  document.getElementById('liefNr').value=entry.lieferschein||'';
+  document.getElementById('liefDatum').value=entry.datum||todayISO;
+  document.getElementById('liefKfz').value=entry.kennzeichen||'';
+  document.getElementById('liefFirma').value=entry.firma||'';
+  document.getElementById('liefMenge').value=entry.menge||'';
+  document.getElementById('liefHistModal').classList.remove('show');
+  document.getElementById('liefModal').classList.add('show');
+};
+
+window.closeLiefModal=function(){
+  document.getElementById('liefModal').classList.remove('show');
+  _liefActiveMatId=null;_liefEditKey=null;_liefOldMenge=0;
+};
 
 window.saveLieferung=function(){
   if(!_liefActiveMatId){closeLiefModal();return;}
@@ -1610,52 +1637,63 @@ window.saveLieferung=function(){
   const mengeRaw=document.getElementById('liefMenge').value.trim();
   if(!nr||!datum||!firma||!mengeRaw){showToast('Alle Pflichtfelder ausfüllen (inkl. Menge)','amber');return;}
   const mengeNum=Math.max(0,parseFloat(mengeRaw)||0);
-  const entry={lieferschein:nr,datum,kennzeichen:kfz,firma,menge:mengeRaw,createdAt:Date.now()};
-  // 1. Lieferung in Firebase speichern
-  liefRef.child(_liefActiveMatId).child(Date.now().toString()).set(entry)
+  const isEdit=!!_liefEditKey;
+  const entry={lieferschein:nr,datum,kennzeichen:kfz,firma,menge:mengeRaw,createdAt:isEdit?(lagerLieferungen[_liefActiveMatId]?.[_liefEditKey]?.createdAt||Date.now()):Date.now()};
+  const key=isEdit?_liefEditKey:Date.now().toString();
+  const delta=isEdit?(mengeNum-_liefOldMenge):mengeNum;
+  liefRef.child(_liefActiveMatId).child(key).set(entry)
     .then(()=>{
-      // 2. Bestand automatisch erhöhen
-      if(mengeNum>0&&lagerData[_liefActiveMatId]){
+      if(delta!==0&&lagerData[_liefActiveMatId]){
         const mat=LAGER_MAT.find(m=>m.id===_liefActiveMatId);
         const maxVal=mat?mat.max:999;
-        lagerData[_liefActiveMatId].ist=Math.min(maxVal,
-          (Number(lagerData[_liefActiveMatId].ist)||0)+mengeNum);
-        // 3. Neuen Bestand in Firebase speichern
-        const p={};
-        LAGER_MAT.forEach(m=>{
-          const ld=lagerData[m.id];
-          p[m.id]={ist:Number(ld.ist)||0,warn:Number(ld.warn)||m.dw,email:ld.email!==false,sms:ld.sms===true};
-        });
+        lagerData[_liefActiveMatId].ist=Math.min(maxVal,Math.max(0,(Number(lagerData[_liefActiveMatId].ist)||0)+delta));
+        const p={};LAGER_MAT.forEach(m=>{const ld=lagerData[m.id];p[m.id]={ist:Number(ld.ist)||0,warn:Number(ld.warn)||m.dw,email:ld.email!==false,sms:ld.sms===true};});
         return lagerRef.set(p);
       }
     })
     .then(()=>{
       saveKfzIfNew(kfz);
+      const wasEdit=isEdit;
       closeLiefModal();
-      renderLager(); // Karte sofort aktualisieren
-      showToast('Lieferung gespeichert — Bestand aktualisiert','success');
+      renderLager();
+      showToast(wasEdit?'Lieferung aktualisiert':'Lieferung gespeichert — Bestand aktualisiert','success');
+      // Reopen history if it was open before
+      if(wasEdit){openLiefHistorie(_liefHistFilterId);}
     })
     .catch(e=>showToast('Fehler: '+e.message,'amber'));
 };
 
 window.openLiefHistorie=function(matId){
-  renderLiefHistorie(matId||null);
+  _liefHistFilterId=matId||null;
+  renderLiefHistorie(_liefHistFilterId);
   document.getElementById('liefHistModal').classList.add('show');
 };
 window.closeLiefHistorie=function(){document.getElementById('liefHistModal').classList.remove('show');};
 
 function renderLiefHistorie(filterMatId){
+  _liefHistFilterId=filterMatId||null;
   const body=document.getElementById('liefHistBody');
   const mats=filterMatId?LAGER_MAT.filter(m=>m.id===filterMatId):LAGER_MAT;
   let html='';
   mats.forEach(m=>{
-    const entries=lagerLieferungen[m.id]?Object.values(lagerLieferungen[m.id]).sort((a,b)=>b.createdAt-a.createdAt):[];
+    const raw=lagerLieferungen[m.id]||{};
+    const entries=Object.entries(raw).map(([k,v])=>({...v,_key:k})).sort((a,b)=>b.createdAt-a.createdAt);
     html+=`<div class="lief-mat-head">${esc(m.name)}<span class="cnt-badge">${entries.length}</span></div>`;
     if(!entries.length){html+='<div class="lief-empty">Noch keine Lieferungen.</div>';}
     else{
-      html+='<table class="lief-table"><thead><tr><th>Lieferschein</th><th>Datum</th><th>Firma</th><th>Kennzeichen</th><th>Menge</th></tr></thead><tbody>';
+      html+='<table class="lief-table"><thead><tr><th>Lieferschein</th><th>Datum</th><th>Firma</th><th>Kennzeichen</th><th>Menge</th><th></th></tr></thead><tbody>';
       entries.forEach(e=>{
-        html+=`<tr><td><strong>${esc(e.lieferschein)}</strong></td><td>${fmtDate(e.datum)}</td><td>${esc(e.firma)}</td><td>${esc(e.kennzeichen||'—')}</td><td>${e.menge?esc(e.menge)+' t':'—'}</td></tr>`;
+        html+=`<tr>
+          <td><strong>${esc(e.lieferschein)}</strong></td>
+          <td>${fmtDate(e.datum)}</td>
+          <td>${esc(e.firma)}</td>
+          <td>${esc(e.kennzeichen||'—')}</td>
+          <td>${e.menge?esc(e.menge)+' t':'—'}</td>
+          <td><div class="row-a">
+            <button class="bi edit" onclick="openEditLieferung('${m.id}','${e._key}')" title="Bearbeiten">${iEdit}</button>
+            <button class="bi del" onclick="deleteLieferung('${m.id}','${e._key}')" title="Löschen">${iDel}</button>
+          </div></td>
+        </tr>`;
       });
       html+='</tbody></table>';
     }
@@ -1752,6 +1790,27 @@ function saveKfzIfNew(kfz){
   const updated=[...lagerKennzeichen,kfz].sort();
   lagerKfzRef.set(updated).catch(()=>{});
 }
+
+
+window.deleteLieferung=function(matId,key){
+  const entry=lagerLieferungen[matId]&&lagerLieferungen[matId][key];
+  if(!entry||!confirm('Lieferung "'+entry.lieferschein+'" löschen? Der Bestand wird entsprechend reduziert.'))return;
+  const menge=parseFloat(entry.menge)||0;
+  liefRef.child(matId).child(key).remove()
+    .then(()=>{
+      if(menge>0&&lagerData[matId]){
+        lagerData[matId].ist=Math.max(0,(Number(lagerData[matId].ist)||0)-menge);
+        const p={};LAGER_MAT.forEach(m=>{const ld=lagerData[m.id];p[m.id]={ist:Number(ld.ist)||0,warn:Number(ld.warn)||m.dw,email:ld.email!==false,sms:ld.sms===true};});
+        return lagerRef.set(p);
+      }
+    })
+    .then(()=>{
+      renderLager();
+      renderLiefHistorie(_liefHistFilterId);
+      showToast('Lieferung gelöscht — Bestand reduziert','amber');
+    })
+    .catch(e=>showToast('Fehler: '+e.message,'amber'));
+};
 
 // ===== END LAGER =====
 
