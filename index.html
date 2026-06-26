@@ -7,6 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
@@ -198,13 +200,14 @@ td strong{color:var(--ink);font-weight:700}
 .sm-phone{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--grn-s);border:1px solid #b5d9c2;border-radius:var(--rs);font-size:13px;font-weight:700;color:var(--grn);margin-top:-8px;margin-bottom:14px;display:none}
 .sm-phone svg{flex-shrink:0}
 .fleet-mgmt.sm{grid-template-columns:1fr}
-.sm-row{display:grid;grid-template-columns:1fr 160px 28px;gap:6px;align-items:center;padding:7px 10px;border-bottom:1px solid var(--line);font-size:12px;font-weight:600}
+.sm-row{display:grid;grid-template-columns:80px 1fr 1fr 56px;gap:6px;align-items:center;padding:7px 10px;border-bottom:1px solid var(--line);font-size:12px;font-weight:600}
 .sm-row:last-child{border-bottom:none}
 .sm-row span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sm-row .ph{color:var(--ink3);font-weight:500}
 .sm-row button{background:none;color:var(--brand);font-size:15px;font-weight:700;width:24px;height:24px;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;border:none;cursor:pointer;flex-shrink:0}
 .sm-row button:hover{background:var(--brand-s)}
-.sm-add{display:grid;grid-template-columns:1fr 160px auto;gap:6px;margin-top:8px}
+.sm-add{display:grid;grid-template-columns:90px 1fr 1fr auto;gap:6px;margin-top:8px}
+.sm-add-sm{grid-template-columns:1fr 180px auto!important}
 .sm-add input{padding:8px 10px;border:1px solid var(--line);border-radius:var(--rs);font-size:12px;font-family:inherit;font-weight:600;background:var(--surf)}
 .sm-add input:focus{outline:none;border-color:var(--brand);background:white}
 .sm-add button{padding:8px 14px;background:var(--ink);color:white;border:none;border-radius:var(--rs);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
@@ -243,6 +246,47 @@ td strong{color:var(--ink);font-weight:700}
 .sorten-head{display:grid;grid-template-columns:1fr 110px 80px 90px 60px;gap:8px;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);background:var(--surf);border-bottom:1px solid var(--line)}
 .modal.xl{max-width:700px}
 
+
+.maps-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;background:#4285F4;color:white;border-radius:var(--rs);font-size:11px;font-weight:700;text-decoration:none;cursor:pointer;margin-top:4px;transition:all .15s}
+.maps-btn:hover{background:#1a73e8;text-decoration:none}
+.maps-btn svg{flex-shrink:0}
+
+
+/* ===== TOURENPLAN ===== */
+.tp-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--rl);background:var(--bg-e);box-shadow:var(--sh-sm)}
+.tp-header-row{display:flex;background:var(--surf);border-bottom:2px solid var(--line);position:sticky;top:0;z-index:10}
+.tp-veh-col{width:180px;min-width:180px;padding:10px 14px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);border-right:1px solid var(--line);background:var(--surf)}
+.tp-time-col{display:flex;flex:1}
+.tp-hour{width:80px;min-width:80px;text-align:center;padding:8px 4px;font-size:11px;font-weight:700;color:var(--ink3);border-right:1px solid var(--line)}
+.tp-row{display:flex;border-bottom:1px solid var(--line);min-height:56px;position:relative}
+.tp-row:last-child{border-bottom:none}
+.tp-row:hover{background:var(--surf)}
+.tp-veh-name{width:180px;min-width:180px;padding:10px 14px;border-right:1px solid var(--line);display:flex;flex-direction:column;justify-content:center;background:white;z-index:1}
+.tp-veh-plate{font-size:13px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
+.tp-veh-type{font-size:11px;color:var(--ink3);font-weight:500;margin-top:2px}
+.tp-timeline{flex:1;position:relative;min-height:56px}
+.tp-grid-line{position:absolute;top:0;bottom:0;width:1px;background:var(--line);opacity:.6}
+.tp-block{position:absolute;top:6px;height:44px;border-radius:6px;padding:4px 8px;cursor:pointer;overflow:hidden;transition:opacity .15s;display:flex;flex-direction:column;justify-content:center;min-width:40px;box-sizing:border-box}
+.tp-block:hover{opacity:.85;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.tp-block.sundern{background:var(--grn);color:white}
+.tp-block.fremd{background:var(--blu);color:white}
+.tp-block.unassigned{background:var(--asp-s);color:var(--ink2);border:1px dashed var(--line2)}
+.tp-block-title{font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
+.tp-block-sub{font-size:10px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.tp-unassigned-row .tp-veh-name{background:var(--amb-s)}
+.tp-unassigned-row .tp-veh-plate{color:var(--amb)}
+.tp-detail{background:var(--bg-e);border:1px solid var(--line);border-radius:var(--rl);padding:20px 24px;margin-top:20px;box-shadow:var(--sh-sm);display:none}
+.tp-hero{background:var(--bg-e);border:1px solid var(--line);border-radius:var(--rl);padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:var(--sh-sm)}
+
+
+/* ===== UNIFIED TABLE COLUMNS ===== */
+.tbl-unified{table-layout:fixed;width:100%}
+.tbl-unified th,.tbl-unified td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tc-datum{width:90px}.tc-name{width:150px}.tc-bstnr{width:72px}.tc-aufnr{width:80px}
+.tc-bst{width:140px}.tc-mat{width:115px}.tc-sorte{width:90px}.tc-menge{width:65px}
+.tc-fzgt{width:90px}.tc-anz{width:44px}.tc-fzg{width:110px}.tc-fahr{width:110px}
+.tc-uhr{width:64px}.tc-bem{}.tc-act{width:76px;text-align:right}
+
 @media print{
   body{background:white;padding:0}
   header,.tabs,.toast,.btn-p,.btn-s,.nb,.ndp{display:none!important}
@@ -263,6 +307,42 @@ td strong{color:var(--ink);font-weight:700}
 .date-badge.today{background:var(--grn-s);color:var(--grn)}
 .date-badge.future{background:var(--blu-s);color:var(--blu)}
 .alle-search-hl{background:rgba(209,26,44,.12);border-radius:2px}
+
+
+/* ===== STEINBRUCH-FINDER ===== */
+.sb-hero{background:linear-gradient(135deg,#1a2535 0%,#2d3a50 100%);color:white;border-radius:var(--rl);padding:24px 32px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;box-shadow:var(--sh-md);position:relative;overflow:hidden}
+.sb-hero::before{content:"";position:absolute;top:0;right:0;width:300px;height:100%;background:radial-gradient(circle at top right,rgba(209,26,44,.2),transparent 70%);pointer-events:none}
+.sb-hero-left{position:relative;z-index:1}
+.sb-hero-title{font-size:20px;font-weight:800;letter-spacing:-.02em;margin-bottom:4px}
+.sb-hero-sub{font-size:12px;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.12em;font-weight:600}
+.sb-input-panel{background:var(--bg-e);border:1px solid var(--line);border-radius:var(--rl);padding:20px 24px;margin-bottom:20px;box-shadow:var(--sh-sm);display:grid;grid-template-columns:1fr auto 140px auto;gap:12px;align-items:end}
+.sb-input-panel label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);margin-bottom:6px}
+.sb-result-banner{border-radius:var(--rl);padding:18px 24px;margin-bottom:20px;display:flex;align-items:center;gap:16px;font-weight:700}
+.sb-result-banner.ok{background:var(--grn-s);border:1px solid #5DCAA5;color:var(--grn)}
+.sb-result-banner.no{background:var(--asp-s);border:1px solid var(--line2);color:var(--ink3)}
+.sb-result-banner .icon{font-size:32px;flex-shrink:0}
+.sb-result-banner .main{font-size:16px;letter-spacing:-.01em}
+.sb-result-banner .sub{font-size:13px;font-weight:500;margin-top:2px;opacity:.8}
+.sb-rueckfracht{background:var(--grn);color:white;padding:8px 18px;border-radius:8px;font-size:22px;font-weight:800;white-space:nowrap;flex-shrink:0}
+.sb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-bottom:20px}
+.sb-card{background:var(--bg-e);border:1px solid var(--line);border-radius:var(--rl);padding:16px 18px;display:flex;align-items:center;gap:14px;transition:box-shadow .15s}
+.sb-card:hover{box-shadow:var(--sh-md)}
+.sb-card.nearest{border-color:var(--grn);border-width:2px;background:var(--grn-s)}
+.sb-card.in-radius{border-color:var(--grn)}
+.sb-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.sb-card-info{flex:1}
+.sb-card-name{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:2px}
+.sb-card-addr{font-size:11px;color:var(--ink3);font-weight:500}
+.sb-dist{text-align:right;flex-shrink:0}
+.sb-dist-val{font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
+.sb-dist-unit{font-size:11px;color:var(--ink3);font-weight:600}
+.sb-dist-tag{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:700;margin-top:4px;display:inline-block}
+.sb-dist-tag.ok{background:var(--grn-s);color:var(--grn)}
+.sb-dist-tag.far{background:var(--asp-s);color:var(--ink3)}
+.sb-dist-bar{height:4px;background:var(--line);border-radius:2px;margin-top:8px;overflow:hidden}
+.sb-dist-bar-fill{height:100%;border-radius:2px;transition:width .5s ease}
+#sbMap{height:420px;border-radius:var(--rl);border:1px solid var(--line);box-shadow:var(--sh-sm);margin-bottom:20px;display:none}
+.sb-geocoding{text-align:center;padding:40px;color:var(--ink3);font-size:13px}
 
 /* ===== LAGER ===== */
 .lager-hero{background:linear-gradient(135deg,#1a2d1f 0%,#2a3d30 100%);color:white;border-radius:var(--rl);padding:24px 32px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;box-shadow:var(--sh-md);position:relative;overflow:hidden}
@@ -339,6 +419,14 @@ td strong{color:var(--ink);font-weight:700}
       <button class="tab" data-tab="alle">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
         Alle Aufträge <span class="cnt" id="cntAlle">0</span>
+      </button>
+      <button class="tab" data-tab="tourenplan">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="12" y1="14" x2="16" y2="14"/></svg>
+        Tourenplan
+      </button>
+      <button class="tab" data-tab="steinbruch">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+        Steinbruch-Finder
       </button>
       <button class="tab" data-tab="lager">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -585,11 +673,15 @@ td strong{color:var(--ink);font-weight:700}
         🏢 Fremdfirmen <span id="alleFremdCount" style="background:var(--brand);color:white;padding:2px 8px;border-radius:10px;font-size:11px;margin-left:6px">0</span>
       </div>
       <div class="tw">
-        <table id="tblAlleF" style="display:none">
+        <table id="tblAlleF" class="tbl-unified" style="display:none">
           <thead><tr>
-            <th>Datum</th><th>Kunde</th><th>Auftr.-Nr.</th><th>Baustelle</th><th>Material</th>
-            <th>Sorte</th><th>Menge</th><th>Fzg-Typ</th><th>Fahrzeuge</th>
-            <th>Fahrer</th><th>Uhrzeit</th><th>Bemerkung</th><th></th>
+            <th class="tc-datum">Datum</th><th class="tc-name">Kunde</th>
+            <th class="tc-bstnr"></th><th class="tc-aufnr">Auftr.-Nr.</th>
+            <th class="tc-bst">Baustelle</th><th class="tc-mat">Material</th>
+            <th class="tc-sorte">Sorte</th><th class="tc-menge">Menge</th>
+            <th class="tc-fzgt">Fzg-Typ</th><th class="tc-anz">Anz.</th>
+            <th class="tc-fzg">Fahrzeuge</th><th class="tc-fahr">Fahrer</th>
+            <th class="tc-uhr">Uhrzeit</th><th class="tc-bem">Bemerkung</th><th class="tc-act"></th>
           </tr></thead>
           <tbody id="bodyAlleF"></tbody>
         </table>
@@ -608,11 +700,15 @@ td strong{color:var(--ink);font-weight:700}
         🏗 Sundern <span id="alleSundernCount" style="background:var(--grn);color:white;padding:2px 8px;border-radius:10px;font-size:11px;margin-left:6px">0</span>
       </div>
       <div class="tw">
-        <table id="tblAlleS" style="display:none">
+        <table id="tblAlleS" class="tbl-unified" style="display:none">
           <thead><tr>
-            <th>Datum</th><th>Schachtmeister</th><th>Bst.-Nr.</th><th>Auftr.-Nr.</th><th>Baustelle</th>
-            <th>Fzg-Typ</th><th>Anz.</th><th>Fahrzeuge</th><th>Fahrer</th>
-            <th>Material</th><th>Sorte</th><th>Menge</th><th>Uhrzeit</th><th>Bemerkung</th><th></th>
+            <th class="tc-datum">Datum</th><th class="tc-name">Schachtmeister</th>
+            <th class="tc-bstnr">Bst.-Nr.</th><th class="tc-aufnr">Auftr.-Nr.</th>
+            <th class="tc-bst">Baustelle</th><th class="tc-mat">Material</th>
+            <th class="tc-sorte">Sorte</th><th class="tc-menge">Menge</th>
+            <th class="tc-fzgt">Fzg-Typ</th><th class="tc-anz">Anz.</th>
+            <th class="tc-fzg">Fahrzeuge</th><th class="tc-fahr">Fahrer</th>
+            <th class="tc-uhr">Uhrzeit</th><th class="tc-bem">Bemerkung</th><th class="tc-act"></th>
           </tr></thead>
           <tbody id="bodyAlleS"></tbody>
         </table>
@@ -625,6 +721,67 @@ td strong{color:var(--ink);font-weight:700}
   </div>
 </div>
 
+
+
+
+<!-- TOURENPLAN -->
+<div class="container full view" id="view-tourenplan">
+  <div class="tp-hero">
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="nb nb-i" onclick="tpNav(-1)" style="background:var(--ink);color:white;border-color:var(--ink)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <input type="date" id="tpDate" class="ndp" style="color:var(--ink);background:white;border-color:var(--line)" onchange="renderTourenplan()">
+      <button class="nb nb-i" onclick="tpNav(1)" style="background:var(--ink);color:white;border-color:var(--ink)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
+      <button class="nb" onclick="tpNav('today')" style="background:var(--brand);border-color:var(--brand);color:white">Heute</button>
+    </div>
+    <div id="tpDateLabel" style="font-size:16px;font-weight:800;letter-spacing:-.01em"></div>
+    <div style="display:flex;align-items:center;gap:12px;margin-left:auto">
+      <span style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600"><span style="width:12px;height:12px;border-radius:3px;background:var(--grn);display:inline-block"></span>Sundern</span>
+      <span style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600"><span style="width:12px;height:12px;border-radius:3px;background:var(--blu);display:inline-block"></span>Fremdfirmen</span>
+      <span style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600"><span style="width:12px;height:12px;border-radius:3px;background:var(--asp-s);border:1px dashed var(--line2);display:inline-block"></span>Nicht zugeteilt</span>
+    </div>
+  </div>
+
+  <div class="tp-wrap" id="tpWrap">
+    <div id="tpInner"></div>
+  </div>
+
+  <div class="tp-detail" id="tpDetail">
+    <div id="tpDetailContent"></div>
+  </div>
+</div>
+
+<!-- STEINBRUCH-FINDER -->
+<div class="container full view" id="view-steinbruch">
+  <div class="sb-hero">
+    <div class="sb-hero-left">
+      <div class="sb-hero-title">🗺 Steinbruch-Finder & Rückfracht-Rechner</div>
+      <div class="sb-hero-sub">Nächsten Steinbruch ermitteln · Rückfracht 50% Ansatz prüfen</div>
+      <div style="margin-top:10px;font-size:12px;color:rgba(255,255,255,.6);display:flex;align-items:center;gap:8px"><div style="width:16px;height:16px;background:#1a1d1f;border-radius:3px;border:2px solid white;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:white;font-weight:700">H</div> Startpunkt: Osterfeld 1, 59846 Sundern</div>
+    </div>
+  </div>
+
+  <div class="sb-input-panel">
+    <div>
+      <label>Baustellen-Adresse oder aus gespeicherten wählen</label>
+      <input type="text" id="sbAdresse" placeholder="z.B. Wirtschaftsweg Höllinghofen, Sundern" style="margin:0">
+      <div style="margin-top:6px"><select id="sbBstSelect" onchange="sbSelectBaustelle(this.value)" style="margin:0;font-size:12px;padding:6px 10px"><option value="">— aus gespeicherten Baustellen wählen —</option></select></div>
+    </div>
+    <div>
+      <label>Max. Umweg für Rückfracht</label>
+      <div style="display:flex;align-items:center;gap:6px">
+        <input type="number" id="sbRadius" value="15" min="1" max="100" style="margin:0;width:80px;text-align:center">
+        <span style="font-size:13px;font-weight:600;color:var(--ink3)">km Umweg</span>
+      </div>
+    </div>
+    <button class="btn-p" onclick="sbPruefen()" id="sbBtn" style="padding:10px 20px;white-space:nowrap">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+      Prüfen
+    </button>
+  </div>
+
+  <div id="sbResults" style="display:none"></div>
+  <div id="sbMap"></div>
+</div>
 
 <!-- LAGER -->
 <div class="container full view" id="view-lager">
@@ -708,16 +865,18 @@ td strong{color:var(--ink);font-weight:700}
 
 
 <div class="mb" id="bstModal" onclick="if(event.target===this)closeBstModal()">
-  <div class="modal">
+  <div class="modal" style="max-width:700px">
     <h2>Baustellen verwalten</h2>
     <p>Baustellennummer und Baustellen-Name sind gekoppelt – bei Eingabe der Nummer wird der Name automatisch ausgefüllt und umgekehrt.</p>
     <div class="fleet-mgmt sm">
       <div class="fleet-col">
         <h4>🏗 Baustellen</h4>
-        <div class="fleet-list" id="bstList" style="max-height:320px"></div>
+        <div style="display:grid;grid-template-columns:80px 1fr 1fr 56px;gap:6px;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);background:var(--surf);border-bottom:1px solid var(--line)"><span>Nr.</span><span>Name</span><span>Adresse</span><span></span></div>
+<div class="fleet-list" id="bstList" style="max-height:300px"></div>
         <div class="sm-add">
-          <input type="text" id="newBstNr" placeholder="Bst.-Nr. z.B. 5513" style="max-width:140px">
+          <input type="text" id="newBstNr" placeholder="Bst.-Nr.">
           <input type="text" id="newBstName" placeholder="Baustellen-Name">
+          <input type="text" id="newBstAddr" placeholder="Adresse (Straße, Ort)">
           <button type="button" onclick="addBst()">+ Hinzufügen</button>
         </div>
       </div>
@@ -877,7 +1036,7 @@ document.querySelectorAll('.tab').forEach(tab=>{
     document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
     tab.classList.add('active');
     document.getElementById('view-'+tab.dataset.tab).classList.add('active');
-    if(tab.dataset.tab==='overview')renderOv();if(tab.dataset.tab==='alle')renderAlle();if(tab.dataset.tab==='lager')renderLager();
+    if(tab.dataset.tab==='overview')renderOv();if(tab.dataset.tab==='alle')renderAlle();if(tab.dataset.tab==='lager')renderLager();if(tab.dataset.tab==='tourenplan'){document.getElementById('tpDate').value=tpDate||todayISO;renderTourenplan();}
   });
 });
 
@@ -908,6 +1067,7 @@ bstRef.on('value',s=>{
   else if(!s.val()){/* start empty */}
   rebuildBstSelects();
   renderBstModal();
+  rebuildSbSelect();
 });
 
 smRef.on('value',s=>{
@@ -925,8 +1085,8 @@ connRef.on('value',s=>{
   else{el.className='conn offline';tx.textContent='Offline'}
 });
 
-fremdRef.on('value',s=>{data.fremd=objArr(s.val());renderF();if(activeTab()==='overview')renderOv();if(activeTab()==='alle')renderAlle();document.getElementById('cntAlle').textContent=data.fremd.length+data.sundern.length});
-sundernRef.on('value',s=>{data.sundern=objArr(s.val());renderS();if(activeTab()==='overview')renderOv();if(activeTab()==='alle')renderAlle();document.getElementById('cntAlle').textContent=data.fremd.length+data.sundern.length});
+fremdRef.on('value',s=>{data.fremd=objArr(s.val());renderF();if(activeTab()==='overview')renderOv();if(activeTab()==='alle')renderAlle();if(activeTab()==='tourenplan')renderTourenplan();document.getElementById('cntAlle').textContent=data.fremd.length+data.sundern.length});
+sundernRef.on('value',s=>{data.sundern=objArr(s.val());renderS();if(activeTab()==='overview')renderOv();if(activeTab()==='alle')renderAlle();if(activeTab()==='tourenplan')renderTourenplan();document.getElementById('cntAlle').textContent=data.fremd.length+data.sundern.length});
 fleetRef.on('value',s=>{
   const v=s.val();
   if(v&&v.vehicles&&v.vehicles.length){
@@ -985,26 +1145,59 @@ function onBstNameChange(name){
 }
 function renderBstModal(){
   document.getElementById('bstList').innerHTML=baustellen.length===0
-    ? '<div style="padding:12px;color:var(--ink3);font-size:12px;text-align:center">Noch keine Baustellen angelegt</div>'
+    ? '<div style="padding:16px;color:var(--ink3);font-size:12px;text-align:center">Noch keine Baustellen angelegt — füge unten eine hinzu</div>'
     : baustellen.map((b,i)=>`
     <div class="sm-row">
-      <span title="${esc(b.nr)}" style="max-width:100px">${esc(b.nr)}</span>
-      <span class="ph" style="flex:1" title="${esc(b.name)}">${esc(b.name)}</span>
-      <button onclick="removeBst(${i})" title="Entfernen">×</button>
+      <span title="${esc(b.nr)}" style="font-weight:700">${esc(b.nr)}</span>
+      <span title="${esc(b.name)}">${esc(b.name)}</span>
+      <span class="ph" title="${esc(b.addr||'')}">${b.addr?esc(b.addr):'<em style="opacity:.5">keine Adresse</em>'}</span>
+      <div style="display:flex;gap:3px">
+        <button onclick="startBstEdit(${i})" title="Adresse bearbeiten" style="background:none;color:var(--amb);font-size:13px;width:24px;height:24px;border-radius:4px;border:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center">✎</button>
+        <button onclick="removeBst(${i})" title="Entfernen" style="background:none;color:var(--brand);font-size:15px;font-weight:700;width:24px;height:24px;border-radius:4px;border:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center">×</button>
+      </div>
     </div>`).join('');
 }
+
+let _bstEditIdx=null;
+window.startBstEdit=function(i){
+  _bstEditIdx=i;
+  const b=baustellen[i];
+  const rows=document.querySelectorAll('#bstList .sm-row');
+  if(!rows[i])return;
+  rows[i].innerHTML=`
+    <span style="font-weight:700">${esc(b.nr)}</span>
+    <input type="text" value="${esc(b.name)}" id="bstEditName" style="padding:4px 6px;border:1px solid var(--line);border-radius:var(--rs);font-size:12px;font-weight:600;font-family:inherit">
+    <input type="text" value="${esc(b.addr||'')}" id="bstEditAddr" placeholder="Straße, Ort" style="padding:4px 6px;border:1px solid var(--line);border-radius:var(--rs);font-size:12px;font-weight:500;font-family:inherit">
+    <div style="display:flex;gap:3px">
+      <button onclick="saveBstEdit(${i})" title="Speichern" style="background:var(--grn-s);color:var(--grn);border:1px solid #5DCAA5;font-size:11px;font-weight:700;padding:2px 6px;border-radius:4px;cursor:pointer;font-family:inherit;white-space:nowrap">✓</button>
+      <button onclick="renderBstModal()" title="Abbrechen" style="background:none;color:var(--ink3);border:1px solid var(--line);font-size:11px;font-weight:700;padding:2px 6px;border-radius:4px;cursor:pointer;font-family:inherit">✕</button>
+    </div>`;
+  document.getElementById('bstEditAddr').focus();
+};
+window.saveBstEdit=function(i){
+  const name=document.getElementById('bstEditName')?.value.trim();
+  const addr=document.getElementById('bstEditAddr')?.value.trim();
+  if(!name){showToast('Name eingeben','amber');return;}
+  baustellen[i]={...baustellen[i],name,addr};
+  bstRef.set(baustellen).then(()=>{
+    renderBstModal();rebuildBstSelects();rebuildSbSelect();
+    showToast('Baustelle aktualisiert','success');
+  }).catch(e=>showToast('Fehler: '+e.message,'amber'));
+};
 function openBstModal(){document.getElementById('bstModal').classList.add('show');renderBstModal();}
 function closeBstModal(){document.getElementById('bstModal').classList.remove('show');}
 function addBst(){
   const nr=document.getElementById('newBstNr').value.trim();
   const name=document.getElementById('newBstName').value.trim();
+  const addr=document.getElementById('newBstAddr')?.value.trim()||'';
   if(!nr||!name){showToast('Nummer und Name eingeben','amber');return;}
   if(baustellen.find(b=>b.nr===nr)){showToast('Nummer bereits vorhanden','amber');return;}
-  baustellen=[...baustellen,{nr,name}].sort((a,b)=>a.nr.localeCompare(b.nr,undefined,{numeric:true}));
+  baustellen=[...baustellen,{nr,name,addr}].sort((a,b)=>a.nr.localeCompare(b.nr,undefined,{numeric:true}));
   bstRef.set(baustellen).then(()=>{
     document.getElementById('newBstNr').value='';
     document.getElementById('newBstName').value='';
-    renderBstModal();rebuildBstSelects();
+    if(document.getElementById('newBstAddr'))document.getElementById('newBstAddr').value='';
+    renderBstModal();rebuildBstSelects();rebuildSbSelect();
     showToast('Baustelle hinzugefügt','success');
   }).catch(e=>showToast('Fehler: '+e.message,'amber'));
 }
@@ -1377,19 +1570,21 @@ function renderAlle(){
     tF.style.display='table';eF.style.display='none';
     document.getElementById('bodyAlleF').innerHTML=fremdList.map(o=>`
       <tr data-id="${o.id}" class="${editingId.fremd===o.id?'er':''}">
-        <td>${getDateLabel(o.abholung)}</td>
-        <td><strong>${esc(o.firmenname)}</strong></td>
-        <td>${esc(o.auftragsnummerF)}</td>
-        <td>${esc(o.baustelle)}</td>
-        <td><span class="badge ${o.material==='Strassenbaustoffe'?'sb':''}">${esc(o.material)}</span></td>
-        <td>${esc(o.sorte)}</td>
-        <td>${esc(o.menge)}</td>
-        <td>${pills(o.vehicleTypes)}</td>
-        <td>${pills(o.vehicles)}</td>
-        <td>${pills(o.drivers)}</td>
-        <td>${esc(o.uhrzeit)}</td>
-        <td>${esc(o.bemerkung)}</td>
-        <td>${ra('fremd',o.id)}</td>
+        <td class="tc-datum">${getDateLabel(o.abholung)}</td>
+        <td class="tc-name"><strong>${esc(o.firmenname)}</strong></td>
+        <td class="tc-bstnr"></td>
+        <td class="tc-aufnr">${esc(o.auftragsnummerF)}</td>
+        <td class="tc-bst">${esc(o.baustelle)}</td>
+        <td class="tc-mat"><span class="badge ${o.material==='Strassenbaustoffe'?'sb':''}">${esc(o.material)}</span></td>
+        <td class="tc-sorte">${esc(o.sorte)}</td>
+        <td class="tc-menge">${esc(o.menge)}</td>
+        <td class="tc-fzgt">${pills(o.vehicleTypes)}</td>
+        <td class="tc-anz">${esc(o.anzahl)}</td>
+        <td class="tc-fzg">${pills(o.vehicles)}</td>
+        <td class="tc-fahr">${pills(o.drivers)}</td>
+        <td class="tc-uhr">${esc(o.uhrzeit)}</td>
+        <td class="tc-bem">${esc(o.bemerkung)}</td>
+        <td class="tc-act">${ra('fremd',o.id)}</td>
       </tr>`).join('');
   }
 
@@ -1400,21 +1595,21 @@ function renderAlle(){
     tS.style.display='table';eS.style.display='none';
     document.getElementById('bodyAlleS').innerHTML=sundernList.map(o=>`
       <tr data-id="${o.id}" class="${editingId.sundern===o.id?'er':''}">
-        <td>${getDateLabel(o.datum)}</td>
-        <td><strong>${esc(o.schachtmeister)}</strong></td>
-        <td>${esc(o.baustellennummer)}</td>
-        <td>${esc(o.auftragsnummer)}</td>
-        <td>${esc(o.baustelle)}</td>
-        <td>${pills(o.vehicleTypes)}</td>
-        <td>${esc(o.anzahl)}</td>
-        <td>${pills(o.vehicles)}</td>
-        <td>${pills(o.drivers)}</td>
-        <td><span class="badge ${o.material==='Strassenbaustoffe'?'sb':''}">${esc(o.material)}</span></td>
-        <td>${esc(o.sorte)}</td>
-        <td>${esc(o.menge)}</td>
-        <td>${esc(o.uhrzeit)}</td>
-        <td>${esc(o.bemerkung)}</td>
-        <td>${ra('sundern',o.id)}</td>
+        <td class="tc-datum">${getDateLabel(o.datum)}</td>
+        <td class="tc-name"><strong>${esc(o.schachtmeister)}</strong></td>
+        <td class="tc-bstnr">${esc(o.baustellennummer)}</td>
+        <td class="tc-aufnr">${esc(o.auftragsnummer)}</td>
+        <td class="tc-bst">${esc(o.baustelle)}</td>
+        <td class="tc-mat"><span class="badge ${o.material==='Strassenbaustoffe'?'sb':''}">${esc(o.material)}</span></td>
+        <td class="tc-sorte">${esc(o.sorte)}</td>
+        <td class="tc-menge">${esc(o.menge)}</td>
+        <td class="tc-fzgt">${pills(o.vehicleTypes)}</td>
+        <td class="tc-anz">${esc(o.anzahl)}</td>
+        <td class="tc-fzg">${pills(o.vehicles)}</td>
+        <td class="tc-fahr">${pills(o.drivers)}</td>
+        <td class="tc-uhr">${esc(o.uhrzeit)}</td>
+        <td class="tc-bem">${esc(o.bemerkung)}</td>
+        <td class="tc-act">${ra('sundern',o.id)}</td>
       </tr>`).join('');
   }
 }
@@ -1457,9 +1652,8 @@ lagerMatRef.on('value',s=>{
   const v=s.val();
   if(v&&Array.isArray(v)&&v.length){
     LAGER_MAT=v;
-  } else if(!s.val()){
-    lagerMatRef.set(DFLT_LAGER_MAT);
-    LAGER_MAT=[...DFLT_LAGER_MAT];
+  } else {
+    LAGER_MAT=[...DFLT_LAGER_MAT]; // use defaults locally, don't write to Firebase yet
   }
   // ensure lagerData has entry for every material
   LAGER_MAT.forEach(m=>{if(!lagerData[m.id])lagerData[m.id]={ist:0,warn:m.dw,email:true,sms:false};});
@@ -1813,6 +2007,482 @@ window.deleteLieferung=function(matId,key){
 };
 
 // ===== END LAGER =====
+
+
+
+// ===== TOURENPLAN =====
+let tpDate=todayISO;
+const TP_START=5,TP_END=18; // 05:00 – 18:00
+const TP_W=80; // px per hour
+let tpActiveBlock=null;
+
+function tpNav(d){
+  if(d==='today'){tpDate=todayISO;}
+  else{const x=new Date(tpDate);x.setDate(x.getDate()+d);tpDate=x.toISOString().split('T')[0];}
+  document.getElementById('tpDate').value=tpDate;
+  renderTourenplan();
+}
+
+// tpDate is initialized when the tab is opened
+
+
+
+
+
+
+
+
+function tpParseHour(str){
+  if(!str)return null;
+  const m=String(str).match(/(\d{1,2})[:.]?(\d{2})?/);
+  if(!m)return null;
+  return parseInt(m[1])+(m[2]?parseInt(m[2])/60:0);
+}
+
+function tpLeft(hour){return(hour-TP_START)*TP_W;}
+function tpWidth(dur){return Math.max(dur*TP_W,50);}
+
+window.tpEditOrder=function(type,id){
+  startEdit(type,id);
+  document.querySelector('[data-tab="'+(type==='sundern'?'sundern':'fremd')+'"]').click();
+};
+
+function renderTourenplan(){
+  if(!document.getElementById('tpDate').value)document.getElementById('tpDate').value=todayISO;
+  const d=new Date(tpDate);
+  document.getElementById('tpDateLabel').textContent=
+    days[d.getDay()]+', '+String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear();
+
+  const sOrders=data.sundern.filter(o=>o.datum===tpDate);
+  const fOrders=data.fremd.filter(o=>o.abholung===tpDate);
+  const allOrders=[
+    ...sOrders.map(o=>({...o,_type:'sundern',_id:o.id})),
+    ...fOrders.map(o=>({...o,_type:'fremd',_id:o.id}))
+  ];
+
+  // Group orders by vehicle
+  const vehMap={};
+  fleet.vehicles.forEach(v=>{vehMap[v]=[];});
+  const unassigned=[];
+
+  allOrders.forEach(o=>{
+    const vehs=Array.isArray(o.vehicles)&&o.vehicles.length?o.vehicles:[];
+    if(!vehs.length){unassigned.push(o);return;}
+    vehs.forEach(v=>{
+      if(!vehMap[v])vehMap[v]=[];
+      vehMap[v].push(o);
+    });
+  });
+
+  // Build HTML
+  const hours=[];
+  for(let h=TP_START;h<=TP_END;h++)hours.push(h);
+
+  let html='<div class="tp-header-row">';
+  html+='<div class="tp-veh-col">Fahrzeug</div><div class="tp-time-col">';
+  hours.forEach(h=>html+=`<div class="tp-hour">${String(h).padStart(2,'0')}:00</div>`);
+  html+='</div></div>';
+
+  // Unassigned row
+  if(unassigned.length){
+    html+=`<div class="tp-row tp-unassigned-row">
+      <div class="tp-veh-name">
+        <div class="tp-veh-plate">⚠ Nicht zugeteilt</div>
+        <div class="tp-veh-type">${unassigned.length} Auftrag${unassigned.length>1?'e':''} ohne Fahrzeug</div>
+      </div>
+      <div class="tp-timeline" style="width:${(TP_END-TP_START)*TP_W}px">
+        ${hours.slice(0,-1).map(h=>`<div class="tp-grid-line" style="left:${(h-TP_START)*TP_W}px"></div>`).join('')}
+        ${unassigned.map((o,i)=>tpBlock(o,i*2.5+TP_START,1.8)).join('')}
+      </div>
+    </div>`;
+  }
+
+  // Vehicle rows
+  Object.entries(vehMap).forEach(([veh,orders])=>{
+    const driverInfo=fleet.drivers.find?.(d=>d.includes(veh.split('-')[0]))||'';
+    html+=`<div class="tp-row">
+      <div class="tp-veh-name">
+        <div class="tp-veh-plate">${esc(veh)}</div>
+        <div class="tp-veh-type">${orders.length?orders.length+' Auftrag'+(orders.length>1?'e':''):'Frei'}</div>
+      </div>
+      <div class="tp-timeline" style="width:${(TP_END-TP_START)*TP_W}px">
+        ${hours.slice(0,-1).map(h=>`<div class="tp-grid-line" style="left:${(h-TP_START)*TP_W}px"></div>`).join('')}
+        ${orders.map(o=>tpBlock(o,tpParseHour(o.uhrzeit)||8,2)).join('')}
+      </div>
+    </div>`;
+  });
+
+  document.getElementById('tpInner').innerHTML=html;
+  document.getElementById('tpDetail').style.display='none';
+  tpActiveBlock=null;
+}
+
+function tpBlock(o,startH,durH){
+  const cls=o._type;
+  const title=o._type==='sundern'?esc(o.schachtmeister||'Sundern'):esc(o.firmenname||'Fremdfirma');
+  const sub=esc(o.baustelle||(o._type==='sundern'?o.menge:''));
+  const left=Math.max(0,tpLeft(startH));
+  const w=tpWidth(durH);
+  const time=o.uhrzeit?esc(o.uhrzeit):'';
+  return `<div class="tp-block ${cls}" style="left:${left}px;width:${w}px"
+    onclick="tpShowDetail('${o._type}','${o._id}',event)"
+    title="${title}">
+    <div class="tp-block-title">${time?time+' · ':''}${title}</div>
+    <div class="tp-block-sub">${sub}</div>
+  </div>`;
+}
+
+window.tpShowDetail=function(type,id,evt){
+  evt&&evt.stopPropagation();
+  const o=data[type==='sundern'?'sundern':'fremd'].find(x=>x.id===id);
+  if(!o)return;
+  const el=document.getElementById('tpDetail');
+  const isSund=type==='sundern';
+  el.style.display='block';
+  document.getElementById('tpDetailContent').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--line)">
+      <div>
+        <div style="font-size:16px;font-weight:800;color:${isSund?'var(--grn)':'var(--blu)'}">${isSund?'Sundern-Auftrag':'Fremdfirmen-Auftrag'}</div>
+        <div style="font-size:13px;color:var(--ink3);margin-top:2px">${isSund?esc(o.schachtmeister):esc(o.firmenname)}</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class=\"btn-s\" onclick=\"tpEditOrder('${type}','${id}')\">✎ Bearbeiten</button>
+        <button class="btn-s" onclick="document.getElementById('tpDetail').style.display='none'">✕</button>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+      ${isSund?`
+        <div><div style="font-size:10px;color:var(--ink3);font-weight:700;text-transform:uppercase;margin-bottom:4px">Schachtmeister</div><div style="font-weight:700">${esc(o.schachtmeister)}</div></div>
+        <div><div style="font-size:10px;color:var(--ink3);font-weight:700;text-transform:uppercase;margin-bottom:4px">Baustelle</div><div style="font-weight:700">${esc(o.baustelle)} ${o.baustellennummer?'('+esc(o.baustellennummer)+')':''}</div></div>
+        <div><div style="font-size:10px;color:var(--ink3);font-weight:700;text-transform:uppercase;margin-bottom:4px">Material</div><div style="font-weight:700">${esc(o.material)} ${esc(o.sorte)} · ${esc(o.menge)}</div></div>
+        <div><div style="font-size:10px;color:var(--ink3);font-weight:700;text-transform:uppercase;margin-bottom:4px">Uhrzeit</div><div style="font-weight:700">${esc(o.uhrzeit)||'—'}</div></div>
+      `:`
+        <div><div style="font-size:10px;color:var(--ink3);font-weight:700;text-transform:uppercase;margin-bottom:4px">Firma</div><div style="font-weight:700">${esc(o.firmenname)}</div></div>
+        <div><div style="font-size:10px;color:var(--ink3);font-weight:700;text-transform:uppercase;margin-bottom:4px">Baustelle</div><div style="font-weight:700">${esc(o.baustelle)}</div></div>
+        <div><div style="font-size:10px;color:var(--ink3);font-weight:700;text-transform:uppercase;margin-bottom:4px">Material</div><div style="font-weight:700">${esc(o.material)} ${esc(o.sorte)} · ${esc(o.menge)}</div></div>
+        <div><div style="font-size:10px;color:var(--ink3);font-weight:700;text-transform:uppercase;margin-bottom:4px">Abholung</div><div style="font-weight:700">${fmtDate(o.abholung)} ${esc(o.uhrzeit)||''}</div></div>
+      `}
+      <div><div style="font-size:10px;color:var(--ink3);font-weight:700;text-transform:uppercase;margin-bottom:4px">Fahrzeuge</div><div style="font-weight:700">${(o.vehicles&&o.vehicles.length)?o.vehicles.map(esc).join(', '):'<em style="color:var(--ink3);font-weight:400">Kein Fahrzeug zugeteilt</em>'}</div></div>
+      <div><div style="font-size:10px;color:var(--ink3);font-weight:700;text-transform:uppercase;margin-bottom:4px">Fahrer</div><div style="font-weight:700">${(o.drivers&&o.drivers.length)?o.drivers.map(esc).join(', '):'—'}</div></div>
+      ${o.bemerkung?`<div style="grid-column:1/-1"><div style="font-size:10px;color:var(--ink3);font-weight:700;text-transform:uppercase;margin-bottom:4px">Bemerkung</div><div style="padding:8px 12px;background:var(--amb-s);border-left:3px solid var(--amb);border-radius:4px;font-size:13px">${esc(o.bemerkung)}</div></div>`:''}
+    </div>`;
+  el.scrollIntoView({behavior:'smooth',block:'nearest'});
+};
+// ===== END TOURENPLAN =====
+
+// ===== STEINBRUCH-FINDER =====
+const ORS_KEY='eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjU0NDI2YjYzZWRiNTQxNzk4M2UxMWFjY2I0YzdjMThmIiwiaCI6Im11cm11cjY0In0=';
+
+// Hilgenroth Firmenstandort
+const HILGENROTH = {name:'Rudolf Hilgenroth GmbH & Co.', addr:'Osterfeld 1, 59846 Sundern', lat:51.32802, lng:8.07351};
+
+// Confirmed coords: Halbeswig from OpenStreetMap, Calcit from worldplaces.me
+// Others geocoded via Nominatim on first open
+const STEINBRUECHE_DEF = [
+  // Koordinaten werden via Nominatim präzise geocodiert (Cache: steinbruchCoordsV3)
+  // Fallback-Werte basieren auf OSM/Branchenbuch/Wikipedia-Recherche
+  {name:'Diabaswerk Halbeswig', addr:'Halbeswig 100, 59909 Bestwig',              lat:51.32737, lng:8.38927, color:'#d11a2c'}, // OSM bestätigt
+  {name:'Mineral Berge',        addr:'Zur Winnschla 36, 59872 Meschede',          lat:51.3418,  lng:8.3389,  color:'#EF9F27'}, // Meschede-Berge
+  {name:'Ebel',                 addr:'Gut Habbel 1, 59757 Arnsberg',              lat:51.3748,  lng:7.9843,  color:'#1a5ab8'}, // Herdringen
+  {name:'Lanwehr',              addr:'Am Langen Stück 1, 59757 Arnsberg',         lat:51.3551,  lng:7.9748,  color:'#1f7a3f'}, // SE Müschede (Wikipedia)
+  {name:'Calcit',               addr:'Deinstrop 1D, 59757 Arnsberg',              lat:51.39422, lng:7.90022, color:'#8B5CF6'}, // worldplaces.me bestätigt
+  {name:'WGU Berge',            addr:'Winnschla 8, 59872 Meschede',               lat:51.3423,  lng:8.3356,  color:'#EC4899'}, // Meschede-Berge
+  {name:'Lhoist',               addr:'Hönnetalstraße 74, 58710 Menden',           lat:51.4350,  lng:7.7612,  color:'#06B6D4'}, // Hönne-Tal Menden
+];
+let STEINBRUECHE=[...STEINBRUECHE_DEF];
+let _sbGeocoded=false;
+
+async function sbEnsureGeocoded(){
+  if(_sbGeocoded)return;
+  // Load cached coords from Firebase first
+  const cached=await db.ref('steinbruchCoordsV3').once('value').then(s=>s.val()).catch(()=>null);
+  if(cached&&Array.isArray(cached)&&cached.length===STEINBRUECHE_DEF.length&&cached.filter(c=>c.lat!==null).length>=STEINBRUECHE_DEF.filter(c=>c.lat!==null).length+3){
+    STEINBRUECHE=cached;_sbGeocoded=true;return;
+  }
+  // Geocode missing entries via Nominatim (rate-limited: 1 req/s)
+  const result=[...STEINBRUECHE_DEF];
+  for(let i=0;i<result.length;i++){
+    // Try Nominatim for every entry; fallback to hardcoded if fails
+    try{
+      const r=await fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(result[i].addr)+'&format=json&countrycodes=de&limit=1',{headers:{'Accept-Language':'de'}});
+      const d=await r.json();
+      if(d&&d[0]){result[i]={...result[i],lat:parseFloat(d[0].lat),lng:parseFloat(d[0].lon)};}
+    }catch(e){}
+    await new Promise(res=>setTimeout(res,1100)); // Nominatim rate limit
+  }
+  STEINBRUECHE=result;_sbGeocoded=true;
+  // Cache in Firebase for next time
+  db.ref('steinbruchCoordsV3').set(result).catch(()=>{});
+}
+let _sbMap=null;
+let _sbLayer=null;
+let _sbGeocoding=false;
+
+async function orsRoute(fromLng,fromLat,toLng,toLat){
+  try{
+    const url=`https://api.openrouteservice.org/v2/directions/driving-hgv?api_key=${ORS_KEY}&start=${fromLng},${fromLat}&end=${toLng},${toLat}`;
+    const resp=await fetch(url,{headers:{'Accept':'application/json, application/geo+json'}});
+    if(!resp.ok)throw new Error('HTTP '+resp.status);
+    const d=await resp.json();
+    const feat=d&&d.features&&d.features[0];
+    if(!feat)return null;
+    const seg=feat.properties&&feat.properties.segments&&feat.properties.segments[0];
+    if(!seg||seg.distance==null)return null;
+    return{
+      distKm:seg.distance/1000,
+      durationMin:Math.round(seg.duration/60),
+      coords:(feat.geometry&&feat.geometry.coordinates||[]).map(c=>[c[1],c[0]])
+    };
+  }catch(e){return null;}
+}
+function fmtDur(min){if(!min&&min!==0)return'';const h=Math.floor(min/60),m=min%60;return h?h+'h '+m+'min':m+' min';}
+
+function haversineKm(lat1,lng1,lat2,lng2){
+  const R=6371,dLat=(lat2-lat1)*Math.PI/180,dLng=(lng2-lng1)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+function sbRebuildSelect(){
+  const sel=document.getElementById('sbBstSelect');
+  if(!sel)return;
+  sel.innerHTML='<option value="">— aus gespeicherten Baustellen wählen —</option>'
+    +baustellen.map(b=>`<option value="${esc(b.nr)}">${esc(b.nr)} – ${esc(b.name)}${b.addr?' ('+esc(b.addr)+')':' ⚠ keine Adresse'}</option>`).join('');
+}
+window.sbSelectBaustelle=function(nr){
+  if(!nr)return;
+  const b=baustellen.find(x=>x.nr===nr);
+  if(!b)return;
+  if(b.addr&&!/^[\d.,\s]+$/.test(b.addr.trim())){
+    document.getElementById('sbAdresse').value=b.addr;
+    showToast(b.nr+' – '+b.name+' gewählt','blue');
+  } else if(b.addr&&/^[\d.,\s]+$/.test(b.addr.trim())){
+    showToast('⚠ Adresse "'+b.addr+'" sieht wie Koordinaten aus – bitte im Baustellen-Modal die echte Adresse eintragen','amber');
+  } else {
+    showToast('Keine Adresse hinterlegt – bitte im Baustellen-Modal ergänzen','amber');
+  }
+};
+
+window.sbPruefen=async function(){
+  const adresse=document.getElementById('sbAdresse').value.trim();
+  if(!adresse){showToast('Bitte Adresse eingeben','amber');return;}
+  if(_sbGeocoding)return;
+  _sbGeocoding=true;
+  // Geocode quarries if not done yet
+  if(!_sbGeocoded){showToast('Steinbruch-Koordinaten werden geladen…','blue');await sbEnsureGeocoded();}
+  const btn=document.getElementById('sbBtn');
+  btn.textContent='Suche…';btn.disabled=true;
+  document.getElementById('sbResults').innerHTML='<div class="sb-geocoding">📍 Adresse wird gesucht…</div>';
+  document.getElementById('sbResults').style.display='block';
+  try{
+    const resp=await fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(adresse)+'&format=json&countrycodes=de&limit=1',{headers:{'Accept-Language':'de'}});
+    const data=await resp.json();
+    if(!data.length){
+      document.getElementById('sbResults').innerHTML='<div class="sb-geocoding">❌ Adresse nicht gefunden. Bitte genauer eingeben (z.B. Straße, Stadt).</div>';
+      return;
+    }
+    const lat=parseFloat(data[0].lat);
+    const lng=parseFloat(data[0].lon);
+    const label=data[0].display_name.split(',').slice(0,3).join(', ');
+    await sbRenderResults(lat,lng,label);
+  }catch(e){
+    document.getElementById('sbResults').innerHTML='<div class="sb-geocoding">❌ Geocoding-Fehler: '+esc(e.message)+'</div>';
+  }finally{
+    _sbGeocoding=false;
+    btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>Prüfen';
+    btn.disabled=false;
+  }
+};
+
+function km(v){return(typeof v==='number'&&!isNaN(v))?v:null;}
+function fmtKm(v){const n=km(v);return n!==null?n.toFixed(1):'?';}
+
+async function sbRenderResults(lat,lng,label){
+  const maxDetour=Math.max(1,parseInt(document.getElementById('sbRadius').value)||15);
+  const resEl=document.getElementById('sbResults');
+  resEl.style.display='block';
+
+  const validSbs=STEINBRUECHE.filter(s=>s.lat!==null&&s.lng!==null);
+  if(!validSbs.length){
+    resEl.innerHTML='<div class="sb-geocoding">&#9203; Koordinaten laden noch &ndash; bitte kurz warten und erneut Pr&uuml;fen klicken.</div>';
+    _sbGeocoded=false;return;
+  }
+
+  resEl.innerHTML='<div class="sb-geocoding">&#128739; LKW-Routen werden berechnet &hellip; ('+validSbs.length*2+1+' Anfragen)</div>';
+
+  // Alle Routen parallel: HQ&#8594;Bst | Bst&#8594;SB (x7) | SB&#8594;HQ (x7)
+  const [hqR,bstHqR,...fwdArr]=await Promise.all([
+    orsRoute(HILGENROTH.lng,HILGENROTH.lat,lng,lat),
+    orsRoute(lng,lat,HILGENROTH.lng,HILGENROTH.lat), // Bst→HQ direkt
+    ...validSbs.map(s=>orsRoute(lng,lat,s.lng,s.lat))
+  ]);
+  const bwdArr=await Promise.all(validSbs.map(s=>orsRoute(s.lng,s.lat,HILGENROTH.lng,HILGENROTH.lat)));
+
+  const distHQ_Bst=hqR&&km(hqR.distKm)!==null?hqR.distKm:haversineKm(HILGENROTH.lat,HILGENROTH.lng,lat,lng);
+  const durHQ_Bst=hqR?hqR.durationMin:null;
+  // Echter direkter Rückweg Baustelle→Hilgenroth (NICHT identisch mit HQ→Bst!)
+  const directReturn=bstHqR&&km(bstHqR.distKm)!==null?bstHqR.distKm:haversineKm(lat,lng,HILGENROTH.lat,HILGENROTH.lng);
+  const durDirectReturn=bstHqR?bstHqR.durationMin:null;
+  // F&uuml;r jeden SB: Umweg = (Bst&#8594;SB&#8594;HQ) - (Bst&#8594;HQ direkt)
+  const rows=validSbs.map((s,i)=>{
+    const rf=fwdArr[i],rb=bwdArr[i];
+    const dBstSb=rf&&km(rf.distKm)!==null?rf.distKm:haversineKm(lat,lng,s.lat,s.lng);
+    const dSbHQ =rb&&km(rb.distKm)!==null?rb.distKm:haversineKm(s.lat,s.lng,HILGENROTH.lat,HILGENROTH.lng);
+    const detour=Math.round((dBstSb+dSbHQ-distHQ_Bst)*10)/10;
+    return{...s,dBstSb,dSbHQ,detour,
+           durBstSb:rf?rf.durationMin:null,durSbHQ:rb?rb.durationMin:null,
+           routeCoords:rf?rf.coords:null,bwdCoords:rb?rb.coords:null};
+  });
+  rows.sort((a,b)=>a.detour-b.detour);
+  const best=rows[0];
+  if(!best){resEl.innerHTML='<div class="sb-geocoding">&#10060; Keine Steinbr&uuml;che verf&uuml;gbar.</div>';return;}
+
+  const ok=best.detour<=maxDetour;
+
+  let html='';
+
+  // Banner
+  if(ok){
+    html+=`<div class="sb-result-banner ok">
+      <div class="icon">&#9989;</div>
+      <div style="flex:1">
+        <div class="main">R&uuml;ckfracht m&ouml;glich &mdash; ${esc(best.name)}</div>
+        <div class="sub">${esc(label)} &middot; Umweg &uuml;ber ${esc(best.name)}: <strong>${best.detour>=0?'+':''}${best.detour.toFixed(1)} km</strong> (erlaubt: ${maxDetour} km) &mdash; Steinbruch liegt auf dem R&uuml;ckweg!</div>
+      </div>
+      <div class="sb-rueckfracht">50 %</div>
+    </div>`;
+  }else{
+    html+=`<div class="sb-result-banner no">
+      <div class="icon">&#128205;</div>
+      <div style="flex:1">
+        <div class="main">Kein Steinbruch auf dem R&uuml;ckweg (Limit: ${maxDetour} km Umweg)</div>
+        <div class="sub">Geringster Umweg: ${esc(best.name)} (+${best.detour.toFixed(1)} km) &mdash; Umweg zu gro&szlig;, volle Fracht</div>
+      </div>
+      <div style="padding:8px 16px;background:var(--ink2);color:white;border-radius:8px;font-size:18px;font-weight:800">100 %</div>
+    </div>`;
+  }
+
+  // Cards
+  html+='<div class="sb-grid">';
+  rows.forEach((r,i)=>{
+    const inR=r.detour<=maxDetour;
+    const pct=Math.max(4,Math.min(100,Math.round((1-(r.detour+5)/Math.max(rows[rows.length-1].detour+5,20))*100)));
+    html+=`<div class="sb-card${i===0?' nearest':inR?' in-radius':''}">
+      <span class="sb-dot" style="background:${r.color}"></span>
+      <div class="sb-card-info">
+        <div class="sb-card-name">${i===0?'&#11088; ':''}${esc(r.name)}</div>
+        <div class="sb-card-addr">${esc(r.addr)}</div>
+        <div style="font-size:11px;color:var(--ink3);margin-top:3px">Bst&#8594;SB: ${fmtKm(r.dBstSb)} km &middot; SB&#8594;HRS: ${fmtKm(r.dSbHQ)} km</div>
+        <a class="maps-btn" href="https://www.google.com/maps/dir/?api=1&destination=${r.lat},${r.lng}" target="_blank">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Google Maps</a>
+        <div class="sb-dist-bar"><div class="sb-dist-bar-fill" style="width:${pct}%;background:${r.color}"></div></div>
+      </div>
+      <div class="sb-dist">
+        <div class="sb-dist-val" style="color:${r.color}">${r.detour>=0?'+':''}${r.detour.toFixed(1)}</div>
+        <div class="sb-dist-unit">km Umweg</div>
+        <div class="sb-dist-tag ${inR?'ok':'far'}">${r.detour<0?'Auf dem R&uuml;ckweg &#10003;':inR?'R&uuml;ckfracht 50%':'Volle Fracht'}</div>
+      </div>
+    </div>`;
+  });
+  html+='</div>';
+
+  // Routenübersicht
+  html+=`<div style="background:var(--bg-e);border:1px solid var(--line);border-radius:var(--rl);padding:18px 24px;margin-bottom:20px;box-shadow:var(--sh-sm)">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--line)">&#128739; Routenübersicht &middot; Umweg-Berechnung (echte LKW-Route)<a class="maps-btn" href="https://www.google.com/maps/dir/${HILGENROTH.lat},${HILGENROTH.lng}/${lat},${lng}/${best.lat},${best.lng}/${HILGENROTH.lat},${HILGENROTH.lng}" target="_blank" style="margin-left:12px;font-size:11px"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>Gesamtroute in Maps</a></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
+      <div style="padding:12px 16px;background:var(--surf);border-radius:var(--rs);border:1px solid var(--line)">
+        <div style="font-size:10px;color:var(--ink3);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Hilgenroth &#8594; Baustelle</div>
+        <div style="font-size:20px;font-weight:800">${fmtKm(distHQ_Bst)} <span style="font-size:13px;font-weight:600;color:var(--ink3)">km</span></div>
+        ${durHQ_Bst?`<div style="font-size:12px;color:var(--ink3);margin-top:2px">&#8987; ${fmtDur(durHQ_Bst)}</div>`:''}
+      </div>
+      <div style="padding:12px 16px;background:var(--surf);border-radius:var(--rs);border:1px solid var(--line)">
+        <div style="font-size:10px;color:var(--ink3);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Baustelle &#8594; ${esc(best.name)}</div>
+        <div style="font-size:20px;font-weight:800">${fmtKm(best.dBstSb)} <span style="font-size:13px;font-weight:600;color:var(--ink3)">km</span></div>
+        ${best.durBstSb?`<div style="font-size:12px;color:var(--ink3);margin-top:2px">&#8987; ${fmtDur(best.durBstSb)}</div>`:''}
+      </div>
+      <div style="padding:12px 16px;background:var(--surf);border-radius:var(--rs);border:1px solid var(--line)">
+        <div style="font-size:10px;color:var(--ink3);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">${esc(best.name)} &#8594; Hilgenroth</div>
+        <div style="font-size:20px;font-weight:800">${fmtKm(best.dSbHQ)} <span style="font-size:13px;font-weight:600;color:var(--ink3)">km</span></div>
+        ${best.durSbHQ?`<div style="font-size:12px;color:var(--ink3);margin-top:2px">&#8987; ${fmtDur(best.durSbHQ)}</div>`:''}
+      </div>
+      <div style="padding:12px 16px;background:var(--surf);border-radius:var(--rs);border:1px solid var(--line)">
+        <div style="font-size:10px;color:var(--ink3);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Direkter Rückweg (ohne SB)</div>
+        <div style="font-size:20px;font-weight:800">${fmtKm(directReturn)} <span style="font-size:13px;font-weight:600;color:var(--ink3)">km</span></div>
+        ${durDirectReturn?`<div style="font-size:12px;color:var(--ink3);margin-top:2px">&#8987; ${fmtDur(durDirectReturn)}</div>`:''}
+      </div>
+      <div style="padding:12px 16px;background:${ok?'var(--grn-s)':'var(--asp-s)'};border-radius:var(--rs);border:1px solid ${ok?'#5DCAA5':'var(--line2)'}">
+        <div style="font-size:10px;color:var(--ink3);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Umweg über ${esc(best.name)}</div>
+        <div style="font-size:20px;font-weight:800;color:${ok?'var(--grn)':'var(--ink3)'}">${best.detour>=0?'+':''}${best.detour.toFixed(1)} <span style="font-size:13px;font-weight:600">km</span></div>
+        <div style="font-size:11px;color:var(--ink3);margin-top:2px">${ok?'Liegt auf dem Rückweg &#10003;':'Umweg zu groß – volle Fracht'}</div>
+      </div>
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:var(--ink3)">Echte LKW-Routen via OpenRouteService. Umweg = (Bst→SB→Hilgenroth) minus (direkter Bst→Hilgenroth Rückweg). Beide Routen echt via ORS.</div>
+  </div>`;
+
+  resEl.innerHTML=html;
+  sbInitMap(lat,lng,rows,maxDetour,label,hqR?hqR.coords:null,best,best.bwdCoords);
+}
+
+function sbInitMap(lat,lng,results,radius,label,hqCoords,near,sbHqCoords){
+  const mapEl=document.getElementById('sbMap');
+  mapEl.style.display='block';
+  if(!_sbMap){
+    _sbMap=L.map('sbMap');
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}).addTo(_sbMap);
+  }
+  if(_sbLayer){_sbLayer.clearLayers();}
+  _sbLayer=L.layerGroup().addTo(_sbMap);
+
+  // Radius circle
+  L.circle([lat,lng],{radius:radius*1000,color:'#1f7a3f',weight:2,fillColor:'#1f7a3f',fillOpacity:.08}).addTo(_sbLayer);
+
+  // Construction site marker (red)
+  const bstIcon=L.divIcon({html:'<div style="width:18px;height:18px;border-radius:50%;background:#d11a2c;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,.3)"></div>',iconSize:[18,18],iconAnchor:[9,9]});
+  L.marker([lat,lng],{icon:bstIcon}).addTo(_sbLayer).bindPopup(`<b>Baustelle</b><br>${esc(label)}`).openPopup();
+
+  // Quarry markers
+  results.forEach((r,i)=>{
+    const icon=L.divIcon({html:`<div style="width:${i===0?16:12}px;height:${i===0?16:12}px;border-radius:50%;background:${r.color};border:2px solid white;box-shadow:0 2px 4px rgba(0,0,0,.3)"></div>`,iconSize:[16,16],iconAnchor:[8,8]});
+    L.marker([r.lat,r.lng],{icon}).addTo(_sbLayer)
+      .bindPopup(`<b>${esc(r.name)}</b><br>${fmtKm(r.distKm)} km${r.durationMin?' · '+fmtDur(r.durationMin):''}<br><small>${esc(r.addr)}</small>`);
+  });
+
+  // Company marker (Hilgenroth)
+  const compIcon=L.divIcon({html:'<div style="width:20px;height:20px;border-radius:3px;background:#1a1d1f;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:10px;color:white">H</div>',iconSize:[20,20],iconAnchor:[10,10]});
+  L.marker([HILGENROTH.lat,HILGENROTH.lng],{icon:compIcon}).addTo(_sbLayer)
+    .bindPopup(`<b>${esc(HILGENROTH.name)}</b><br><small>${esc(HILGENROTH.addr)}</small>`);
+
+  // Draw real route polylines (from ORS) or fallback dashed lines
+  if(hqCoords&&hqCoords.length)
+    L.polyline(hqCoords,{color:'#1a1d1f',weight:3,opacity:.7}).addTo(_sbLayer);
+  else
+    L.polyline([[HILGENROTH.lat,HILGENROTH.lng],[lat,lng]],{color:'#1a1d1f',weight:2,dashArray:'6 4',opacity:.5}).addTo(_sbLayer);
+
+  if(near&&near.routeCoords&&near.routeCoords.length)
+    L.polyline(near.routeCoords,{color:near.color,weight:3,opacity:.8}).addTo(_sbLayer);
+  else if(near)
+    L.polyline([[lat,lng],[near.lat,near.lng]],{color:near.color,weight:2,dashArray:'6 4',opacity:.6}).addTo(_sbLayer);
+
+  if(sbHqCoords&&sbHqCoords.length)
+    L.polyline(sbHqCoords,{color:'#1f7a3f',weight:3,opacity:.6}).addTo(_sbLayer);
+  else if(near)
+    L.polyline([[near.lat,near.lng],[HILGENROTH.lat,HILGENROTH.lng]],{color:'#1f7a3f',weight:2,dashArray:'4 4',opacity:.4}).addTo(_sbLayer);
+
+  // Fit bounds
+  const pts=[[lat,lng],[HILGENROTH.lat,HILGENROTH.lng],...results.map(r=>[r.lat,r.lng])];
+  _sbMap.fitBounds(L.latLngBounds(pts),{padding:[30,30]});
+}
+
+// Rebuild select when baustellen change
+const _origRebuildBst=window.rebuildBstSelects||function(){};
+function rebuildSbSelect(){sbRebuildSelect();}
+// Hook into bstRef listener – rebuild select when tab is shown
+document.addEventListener('DOMContentLoaded',()=>{
+  document.querySelectorAll('.tab').forEach(t=>{
+    t.addEventListener('click',()=>{if(t.dataset.tab==='steinbruch'){sbRebuildSelect();if(_sbMap)setTimeout(()=>_sbMap.invalidateSize(),200);}});
+  });
+});
+// ===== END STEINBRUCH-FINDER =====
 
 function showToast(msg,v){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(v?' '+v:'');setTimeout(()=>t.classList.remove('show'),2200)}
 </script>
