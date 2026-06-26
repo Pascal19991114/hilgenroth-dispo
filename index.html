@@ -2217,6 +2217,7 @@ async function sbEnsureGeocoded(){
 let _sbMap=null;
 let _sbLayer=null;
 let _sbGeocoding=false;
+let _sbDirectLat=null,_sbDirectLng=null,_sbDirectLabel='';
 
 async function orsRoute(fromLng,fromLat,toLng,toLat){
   try{
@@ -2253,13 +2254,24 @@ window.sbSelectBaustelle=function(nr){
   if(!nr)return;
   const b=baustellen.find(x=>x.nr===nr);
   if(!b)return;
-  if(b.addr&&!/^[\d.,\s]+$/.test(b.addr.trim())){
-    document.getElementById('sbAdresse').value=b.addr;
+  _sbDirectLat=null;_sbDirectLng=null;_sbDirectLabel='';
+  const addrTrim=(b.addr||'').trim();
+  // Koordinaten im Adressfeld? → direkt verwenden, Nominatim überspringen
+  const coordMatch=addrTrim.match(/(\d{2}\.\d+)[,\s]+(\d{1,2}\.\d+)/);
+  if(coordMatch){
+    _sbDirectLat=parseFloat(coordMatch[1]);
+    _sbDirectLng=parseFloat(coordMatch[2]);
+    _sbDirectLabel=b.nr+' – '+b.name;
+    // Koordinaten direkt ins Suchfeld
+    document.getElementById('sbAdresse').value=coordMatch[1]+', '+coordMatch[2];
+    showToast(b.nr+' – '+b.name+' • Tipp: Echte Adresse im Baustellen-Modal eintragen','blue');
+  } else if(addrTrim){
+    document.getElementById('sbAdresse').value=addrTrim;
     showToast(b.nr+' – '+b.name+' gewählt','blue');
-  } else if(b.addr&&/^[\d.,\s]+$/.test(b.addr.trim())){
-    showToast('⚠ Adresse "'+b.addr+'" sieht wie Koordinaten aus – bitte im Baustellen-Modal die echte Adresse eintragen','amber');
   } else {
-    showToast('Keine Adresse hinterlegt – bitte im Baustellen-Modal ergänzen','amber');
+    // Kein Adressfeld – Name eintragen damit Nominatim versucht zu geocodieren
+    document.getElementById('sbAdresse').value='';
+    showToast('⚠ Keine Adresse für '+b.name+' – bitte im Baustellen-Modal Adresse eintragen','amber');
   }
 };
 
@@ -2272,20 +2284,21 @@ window.sbPruefen=async function(){
   if(!_sbGeocoded){showToast('Steinbruch-Koordinaten werden geladen…','blue');await sbEnsureGeocoded();}
   const btn=document.getElementById('sbBtn');
   btn.textContent='Suche…';btn.disabled=true;
-  document.getElementById('sbResults').innerHTML='<div class="sb-geocoding">📍 Adresse wird gesucht…</div>';
+  document.getElementById('sbResults').innerHTML='<div class="sb-geocoding">&#128205; Wird berechnet…</div>';
   document.getElementById('sbResults').style.display='block';
   try{
-    const resp=await fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(adresse)+'&format=json&countrycodes=de&limit=1',{headers:{'Accept-Language':'de'}});
-    const data=await resp.json();
-    if(!data.length){
-      document.getElementById('sbResults').innerHTML='<div class="sb-geocoding">❌ Adresse nicht gefunden. Bitte genauer eingeben (z.B. Straße, Stadt).</div>';
-      return;
+    // Direkte Koordinaten (gespeicherte Baustelle)? → Nominatim überspringen
+    if(_sbDirectLat!==null&&_sbDirectLng!==null){
+      await sbRenderResults(_sbDirectLat,_sbDirectLng,_sbDirectLabel||adresse);
+    } else {
+      const resp=await fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(adresse)+'&format=json&countrycodes=de&limit=1',{headers:{'Accept-Language':'de'}});
+      const data=await resp.json();
+      if(!data.length){
+        document.getElementById('sbResults').innerHTML='<div class="sb-geocoding">&#10060; Adresse nicht gefunden. Bitte genauer eingeben.</div>';
+        return;
+      }
+      await sbRenderResults(parseFloat(data[0].lat),parseFloat(data[0].lon),data[0].display_name.split(',').slice(0,3).join(', '));
     }
-    const lat=parseFloat(data[0].lat);
-    const lng=parseFloat(data[0].lon);
-    const label=data[0].display_name.split(',').slice(0,3).join(', ');
-    await sbRenderResults(lat,lng,label);
-  }catch(e){
     document.getElementById('sbResults').innerHTML='<div class="sb-geocoding">❌ Geocoding-Fehler: '+esc(e.message)+'</div>';
   }finally{
     _sbGeocoding=false;
