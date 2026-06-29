@@ -285,7 +285,7 @@ td strong{color:var(--ink);font-weight:700}
 .tc-datum{width:90px}.tc-name{width:150px}.tc-bstnr{width:72px}.tc-aufnr{width:80px}
 .tc-bst{width:140px}.tc-mat{width:115px}.tc-sorte{width:90px}.tc-menge{width:65px}
 .tc-fzgt{width:90px}.tc-anz{width:44px}.tc-fzg{width:110px}.tc-fahr{width:110px}
-.tc-uhr{width:64px}.tc-bem{}.tc-act{width:76px;text-align:right}
+.tc-uhr{width:64px}.tc-bem{}.tc-act{width:92px;text-align:right;overflow:visible!important}
 
 @media print{
   body{background:white;padding:0}
@@ -658,7 +658,10 @@ td strong{color:var(--ink);font-weight:700}
           <option value="past">Vergangene</option>
           <option value="today">Heute</option>
           <option value="future">Zukünftige</option>
+          <option value="week">Diese Woche</option>
+          <option value="date">Datum wählen…</option>
         </select>
+        <input type="date" id="alleDatePick" style="display:none;padding:7px 10px;font-size:13px;border:1px solid var(--line);border-radius:var(--rs);background:var(--surf);color:var(--ink);cursor:pointer">
         <select id="alleType">
           <option value="all">Fremdfirmen + Sundern</option>
           <option value="fremd">Nur Fremdfirmen</option>
@@ -1339,7 +1342,10 @@ window.startEdit=function(type,id){
   renderTags(prefix+'V');renderTags(prefix+'D');
   document.querySelectorAll('tbody tr').forEach(r=>r.classList.remove('er'));
   const row=document.querySelector(`tr[data-id="${id}"]`);if(row)row.classList.add('er');
-  panel.scrollIntoView({behavior:'smooth',block:'start'});
+  // Automatisch zum richtigen Tab wechseln
+  const targetTab=document.querySelector('[data-tab="'+(type==='sundern'?'sundern':'fremd')+'"]');
+  if(targetTab&&!targetTab.classList.contains('active')){targetTab.click();setTimeout(()=>panel.scrollIntoView({behavior:'smooth',block:'start'}),100);}
+  else panel.scrollIntoView({behavior:'smooth',block:'start'});
   if(type==='sundern'){
     const smF=schachtmeister.find(s=>s.name===order.schachtmeister);
     const pChip=document.getElementById('smPhoneChip');
@@ -1536,8 +1542,17 @@ function renderAlle(){
   const filter=document.getElementById('alleFilter').value;
   const typeF=document.getElementById('alleType').value;
 
+  const pickedDate=document.getElementById('alleDatePick').value;
   function matchDate(iso){
     if(filter==='all')return true;
+    if(filter==='date'){return iso===pickedDate;}
+    if(filter==='week'){
+      const d=new Date(iso),now=new Date(todayISO);
+      const dow=now.getDay()||7;
+      const mon=new Date(now);mon.setDate(now.getDate()-dow+1);
+      const sun=new Date(mon);sun.setDate(mon.getDate()+6);
+      return d>=mon&&d<=sun;
+    }
     const cls=getDateClass(iso);
     return cls===filter;
   }
@@ -1615,7 +1630,14 @@ function renderAlle(){
 }
 
 document.getElementById('alleSearch').addEventListener('input',renderAlle);
-document.getElementById('alleFilter').addEventListener('change',renderAlle);
+document.getElementById('alleFilter').addEventListener('change',function(){
+  const v=this.value;
+  const dp=document.getElementById('alleDatePick');
+  dp.style.display=v==='date'?'inline-block':'none';
+  if(v==='date'&&!dp.value)dp.value=todayISO;
+  renderAlle();
+});
+document.getElementById('alleDatePick').addEventListener('change',renderAlle);
 document.getElementById('alleType').addEventListener('change',renderAlle);
 
 
@@ -2179,41 +2201,24 @@ const HILGENROTH = {name:'Rudolf Hilgenroth GmbH & Co.', addr:'Osterfeld 1, 5984
 // Confirmed coords: Halbeswig from OpenStreetMap, Calcit from worldplaces.me
 // Others geocoded via Nominatim on first open
 const STEINBRUECHE_DEF = [
-  // Koordinaten werden via Nominatim präzise geocodiert (Cache: steinbruchCoordsV3)
-  // Fallback-Werte basieren auf OSM/Branchenbuch/Wikipedia-Recherche
-  {name:'Diabaswerk Halbeswig', addr:'Halbeswig 100, 59909 Bestwig',              lat:51.32737, lng:8.38927, color:'#d11a2c'}, // OSM bestätigt
-  {name:'Mineral Berge',        addr:'Zur Winnschla 36, 59872 Meschede',          lat:51.3418,  lng:8.3389,  color:'#EF9F27'}, // Meschede-Berge
-  {name:'Ebel',                 addr:'Gut Habbel 1, 59757 Arnsberg',              lat:51.3748,  lng:7.9843,  color:'#1a5ab8'}, // Herdringen
-  {name:'Lanwehr',              addr:'Am Langen Stück 1, 59757 Arnsberg',         lat:51.3551,  lng:7.9748,  color:'#1f7a3f'}, // SE Müschede (Wikipedia)
-  {name:'Calcit',               addr:'Deinstrop 1D, 59757 Arnsberg',              lat:51.39422, lng:7.90022, color:'#8B5CF6'}, // worldplaces.me bestätigt
-  {name:'WGU Berge',            addr:'Winnschla 8, 59872 Meschede',               lat:51.3423,  lng:8.3356,  color:'#EC4899'}, // Meschede-Berge
-  {name:'Lhoist',               addr:'Hönnetalstraße 74, 58710 Menden',           lat:51.4350,  lng:7.7612,  color:'#06B6D4'}, // Hönne-Tal Menden
+  // Koordinaten hartkodiert und manuell verifiziert – kein Nominatim-Geocoding
+  {name:'Diabaswerk Halbeswig', addr:'Halbeswig 100, 59909 Bestwig',          lat:51.32737,  lng:8.38927,  color:'#d11a2c'},
+  {name:'Mineral Berge',        addr:'Zur Winnschla 36, 59872 Meschede',      lat:51.34180,  lng:8.33890,  color:'#EF9F27'},
+  {name:'Ebel',                 addr:'Gut Habbel 1, 59757 Arnsberg',          lat:51.407433, lng:7.980235, color:'#1a5ab8'},
+  {name:'Lanwehr',              addr:'Am Langen Stück 1, 59757 Arnsberg',     lat:51.398507, lng:8.010758, color:'#1f7a3f'},
+  {name:'Calcit',               addr:'Deinstrop 1D, 59757 Arnsberg',          lat:51.39422,  lng:7.90022,  color:'#8B5CF6'},
+  {name:'WGU Berge',            addr:'Winnschla 8, 59872 Meschede',           lat:51.34230,  lng:8.33560,  color:'#EC4899'},
+  {name:'Lhoist',               addr:'Hönnetalstraße 74, 58710 Menden',       lat:51.400383, lng:7.841124, color:'#06B6D4'},
 ];
 let STEINBRUECHE=[...STEINBRUECHE_DEF];
 let _sbGeocoded=false;
 
 async function sbEnsureGeocoded(){
-  if(_sbGeocoded)return;
-  // Load cached coords from Firebase first
-  const cached=await db.ref('steinbruchCoordsV3').once('value').then(s=>s.val()).catch(()=>null);
-  if(cached&&Array.isArray(cached)&&cached.length===STEINBRUECHE_DEF.length&&cached.filter(c=>c.lat!==null).length>=STEINBRUECHE_DEF.filter(c=>c.lat!==null).length+3){
-    STEINBRUECHE=cached;_sbGeocoded=true;return;
-  }
-  // Geocode missing entries via Nominatim (rate-limited: 1 req/s)
-  const result=[...STEINBRUECHE_DEF];
-  for(let i=0;i<result.length;i++){
-    // Try Nominatim for every entry; fallback to hardcoded if fails
-    try{
-      const r=await fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(result[i].addr)+'&format=json&countrycodes=de&limit=1',{headers:{'Accept-Language':'de'}});
-      const d=await r.json();
-      if(d&&d[0]){result[i]={...result[i],lat:parseFloat(d[0].lat),lng:parseFloat(d[0].lon)};}
-    }catch(e){}
-    await new Promise(res=>setTimeout(res,1100)); // Nominatim rate limit
-  }
-  STEINBRUECHE=result;_sbGeocoded=true;
-  // Cache in Firebase for next time
-  db.ref('steinbruchCoordsV3').set(result).catch(()=>{});
+  // Alle Koordinaten hartkodiert – kein Nominatim mehr
+  STEINBRUECHE=[...STEINBRUECHE_DEF];
+  _sbGeocoded=true;
 }
+
 let _sbMap=null;
 let _sbLayer=null;
 let _sbGeocoding=false;
@@ -2221,7 +2226,7 @@ let _sbDirectLat=null,_sbDirectLng=null,_sbDirectLabel='';
 
 async function orsRoute(fromLng,fromLat,toLng,toLat){
   try{
-    const url=`https://api.openrouteservice.org/v2/directions/driving-hgv?api_key=${ORS_KEY}&start=${fromLng},${fromLat}&end=${toLng},${toLat}`;
+    const url=`https://api.openrouteservice.org/v2/directions/driving-car?api_key=${ORS_KEY}&start=${fromLng},${fromLat}&end=${toLng},${toLat}`;
     const resp=await fetch(url,{headers:{'Accept':'application/json, application/geo+json'}});
     if(!resp.ok)throw new Error('HTTP '+resp.status);
     const d=await resp.json();
@@ -2310,6 +2315,26 @@ window.sbPruefen=async function(){
 function km(v){return(typeof v==='number'&&!isNaN(v))?v:null;}
 function fmtKm(v){const n=km(v);return n!==null?n.toFixed(1):'?';}
 
+
+// ── Punkt-zu-Segment Distanz (km) ────────────────────────────────────────────
+function ptSegDist(plat,plng,alat,alng,blat,blng){
+  // Project point P onto segment A-B, return distance in km
+  const dx=blng-alng,dy=blat-alat;
+  if(dx===0&&dy===0)return haversineKm(plat,plng,alat,alng);
+  const t=Math.max(0,Math.min(1,((plng-alng)*dx+(plat-alat)*dy)/(dx*dx+dy*dy)));
+  return haversineKm(plat,plng,alat+t*dy,alng+t*dx);
+}
+// Minimaler Abstand eines Punktes zur ORS-Polyline der direkten Rückroute
+function distToPolyline(plat,plng,polyline){
+  if(!polyline||polyline.length<2)return Infinity;
+  let minD=Infinity;
+  for(let i=0;i<polyline.length-1;i++){
+    const d=ptSegDist(plat,plng,polyline[i][0],polyline[i][1],polyline[i+1][0],polyline[i+1][1]);
+    if(d<minD)minD=d;
+  }
+  return minD;
+}
+
 async function sbRenderResults(lat,lng,label){
   const maxDetour=Math.max(1,parseInt(document.getElementById('sbRadius').value)||15);
   const resEl=document.getElementById('sbResults');
@@ -2337,15 +2362,22 @@ async function sbRenderResults(lat,lng,label){
   const directReturn=bstHqR&&km(bstHqR.distKm)!==null?bstHqR.distKm:haversineKm(lat,lng,HILGENROTH.lat,HILGENROTH.lng);
   const durDirectReturn=bstHqR?bstHqR.durationMin:null;
   // F&uuml;r jeden SB: Umweg = (Bst&#8594;SB&#8594;HQ) - (Bst&#8594;HQ direkt)
+  const durDirect=bstHqR?bstHqR.durationMin:null;
   const rows=validSbs.map((s,i)=>{
     const rf=fwdArr[i],rb=bwdArr[i];
+    const orsOk=rf&&km(rf.distKm)!==null&&rb&&km(rb.distKm)!==null;
     const dBstSb=rf&&km(rf.distKm)!==null?rf.distKm:haversineKm(lat,lng,s.lat,s.lng);
     const dSbHQ =rb&&km(rb.distKm)!==null?rb.distKm:haversineKm(s.lat,s.lng,HILGENROTH.lat,HILGENROTH.lng);
-    const detour=Math.round((dBstSb+dSbHQ-distHQ_Bst)*10)/10;
-    return{...s,dBstSb,dSbHQ,detour,
-           durBstSb:rf?rf.durationMin:null,durSbHQ:rb?rb.durationMin:null,
+    const detour=Math.round((dBstSb+dSbHQ-directReturn)*10)/10;
+    // Zeitbasierter Umweg: echter Zeitvergleich mit ORS
+    const durBstSb=rf?rf.durationMin:null;
+    const durSbHQ=rb?rb.durationMin:null;
+    const durVia=(durBstSb!==null&&durSbHQ!==null)?(durBstSb+durSbHQ):null;
+    const durDetour=(durVia!==null&&durDirect!==null)?Math.round(durVia-durDirect):null;
+    return{...s,dBstSb,dSbHQ,detour,durBstSb,durSbHQ,durDetour,orsOk,
            routeCoords:rf?rf.coords:null,bwdCoords:rb?rb.coords:null};
   });
+  // Sortierung nach echtem Straßen-Umweg (ORS-basiert)
   rows.sort((a,b)=>a.detour-b.detour);
   const best=rows[0];
   if(!best){resEl.innerHTML='<div class="sb-geocoding">&#10060; Keine Steinbr&uuml;che verf&uuml;gbar.</div>';return;}
@@ -2360,7 +2392,7 @@ async function sbRenderResults(lat,lng,label){
       <div class="icon">&#9989;</div>
       <div style="flex:1">
         <div class="main">R&uuml;ckfracht m&ouml;glich &mdash; ${esc(best.name)}</div>
-        <div class="sub">${esc(label)} &middot; Umweg &uuml;ber ${esc(best.name)}: <strong>${best.detour>=0?'+':''}${best.detour.toFixed(1)} km</strong> (erlaubt: ${maxDetour} km) &mdash; Steinbruch liegt auf dem R&uuml;ckweg!</div>
+        <div class="sub">${esc(label)} &middot; Umweg &uuml;ber ${esc(best.name)}: <strong>${best.detour>=0?'+':''}${best.detour.toFixed(1)} km${best.durDetour!==null?' / '+(best.durDetour>=0?'+':'')+best.durDetour+' min':''}</strong> (erlaubt: ${maxDetour} km) &mdash; ${best.detour<=0?'Liegt direkt auf dem Rückweg ✔':best.orsOk?'Rückfracht möglich':'Rückfracht möglich (Luftlinie!)'}</div>
       </div>
       <div class="sb-rueckfracht">50 %</div>
     </div>`;
@@ -2380,12 +2412,17 @@ async function sbRenderResults(lat,lng,label){
   rows.forEach((r,i)=>{
     const inR=r.detour<=maxDetour;
     const pct=Math.max(4,Math.min(100,Math.round((1-(r.detour+5)/Math.max(rows[rows.length-1].detour+5,20))*100)));
-    html+=`<div class="sb-card${i===0?' nearest':inR?' in-radius':''}">
+    html+=`<div class="sb-card${i===0?' nearest':inR?' in-radius':''}" id="sb-card-${i}" onclick="sbCardClick(${i})" style="cursor:pointer">
       <span class="sb-dot" style="background:${r.color}"></span>
       <div class="sb-card-info">
         <div class="sb-card-name">${i===0?'&#11088; ':''}${esc(r.name)}</div>
         <div class="sb-card-addr">${esc(r.addr)}</div>
-        <div style="font-size:11px;color:var(--ink3);margin-top:3px">Bst&#8594;SB: ${fmtKm(r.dBstSb)} km &middot; SB&#8594;HRS: ${fmtKm(r.dSbHQ)} km</div>
+        <div style="font-size:11px;color:var(--ink3);margin-top:3px">Bst→SB: ${fmtKm(r.dBstSb)} km · SB→HRS: ${fmtKm(r.dSbHQ)} km</div>
+        <div style="font-size:11px;margin-top:2px;color:${r.orsOk?'var(--grn)':'var(--amb)'};font-weight:600">
+          ${r.orsOk
+            ?'⏱ Umweg: '+(r.durDetour!==null?(r.durDetour>=0?'+':'')+r.durDetour+' min':'?')
+            :'⚠ Luftlinie (ORS-Fehler)'}
+        </div>
         <a class="maps-btn" href="https://www.google.com/maps/dir/?api=1&destination=${r.lat},${r.lng}" target="_blank">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Google Maps</a>
         <div class="sb-dist-bar"><div class="sb-dist-bar-fill" style="width:${pct}%;background:${r.color}"></div></div>
@@ -2393,7 +2430,7 @@ async function sbRenderResults(lat,lng,label){
       <div class="sb-dist">
         <div class="sb-dist-val" style="color:${r.color}">${r.detour>=0?'+':''}${r.detour.toFixed(1)}</div>
         <div class="sb-dist-unit">km Umweg</div>
-        <div class="sb-dist-tag ${inR?'ok':'far'}">${r.detour<0?'Auf dem R&uuml;ckweg &#10003;':inR?'R&uuml;ckfracht 50%':'Volle Fracht'}</div>
+        <div class="sb-dist-tag ${inR?'ok':'far'}">${!r.orsOk?'&#9888; Luftlinie':r.detour<=0?'Direkt auf Weg &#10003;':inR?'Rückfracht 50%':'Volle Fracht'}</div>
       </div>
     </div>`;
   });
@@ -2421,7 +2458,7 @@ async function sbRenderResults(lat,lng,label){
       <div style="padding:12px 16px;background:var(--surf);border-radius:var(--rs);border:1px solid var(--line)">
         <div style="font-size:10px;color:var(--ink3);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Direkter Rückweg (ohne SB)</div>
         <div style="font-size:20px;font-weight:800">${fmtKm(directReturn)} <span style="font-size:13px;font-weight:600;color:var(--ink3)">km</span></div>
-        ${durDirectReturn?`<div style="font-size:12px;color:var(--ink3);margin-top:2px">&#8987; ${fmtDur(durDirectReturn)}</div>`:''}
+        ${durDirect!==null?`<div style="font-size:12px;color:var(--ink3);margin-top:2px">&#8987; ${fmtDur(durDirect)}</div>`:''}
       </div>
       <div style="padding:12px 16px;background:${ok?'var(--grn-s)':'var(--asp-s)'};border-radius:var(--rs);border:1px solid ${ok?'#5DCAA5':'var(--line2)'}">
         <div style="font-size:10px;color:var(--ink3);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Umweg über ${esc(best.name)}</div>
@@ -2436,7 +2473,47 @@ async function sbRenderResults(lat,lng,label){
   sbInitMap(lat,lng,rows,maxDetour,label,hqR?hqR.coords:null,best,best.bwdCoords);
 }
 
+// Globale Variablen für Karten-State
+let _sbRouteLayer=null;
+let _sbBaseLayer=null;
+let _sbActiveSet=new Set(); // Mehrfachauswahl: Set von Indizes
+let _sbAllResults=null,_sbLat=null,_sbLng=null,_sbLabel=null,_sbHqCoords=null,_sbRadius=null;
+
+function sbDrawRoutes(){
+  if(_sbRouteLayer){_sbRouteLayer.clearLayers();}
+  else{_sbRouteLayer=L.layerGroup().addTo(_sbMap);}
+
+  const results=_sbAllResults,lat=_sbLat,lng=_sbLng;
+  if(!results)return;
+
+  if(_sbActiveSet.size===0){
+    // Nichts ausgewählt: nur HQ→Bst Hinfahrt
+    if(_sbHqCoords&&_sbHqCoords.length)
+      L.polyline(_sbHqCoords,{color:'#1a1d1f',weight:3,opacity:.65,dashArray:'8 5'}).addTo(_sbRouteLayer);
+    else
+      L.polyline([[HILGENROTH.lat,HILGENROTH.lng],[lat,lng]],{color:'#1a1d1f',weight:2,dashArray:'6 4',opacity:.5}).addTo(_sbRouteLayer);
+    return;
+  }
+
+  // Alle ausgewählten Steinbrüche zeichnen
+  _sbActiveSet.forEach(idx=>{
+    const r=results[idx];
+    if(r.routeCoords&&r.routeCoords.length)
+      L.polyline(r.routeCoords,{color:r.color,weight:5,opacity:.92}).addTo(_sbRouteLayer);
+    else
+      L.polyline([[lat,lng],[r.lat,r.lng]],{color:r.color,weight:4,dashArray:'6 4',opacity:.75}).addTo(_sbRouteLayer);
+    if(r.bwdCoords&&r.bwdCoords.length)
+      L.polyline(r.bwdCoords,{color:r.color,weight:4,opacity:.78}).addTo(_sbRouteLayer);
+    else
+      L.polyline([[r.lat,r.lng],[HILGENROTH.lat,HILGENROTH.lng]],{color:r.color,weight:4,dashArray:'5 4',opacity:.65}).addTo(_sbRouteLayer);
+  });
+}
+
 function sbInitMap(lat,lng,results,radius,label,hqCoords,near,sbHqCoords){
+  // Globals speichern
+  _sbLat=lat;_sbLng=lng;_sbAllResults=results;_sbLabel=label;_sbHqCoords=hqCoords;_sbRadius=radius;
+  _sbActiveSet=new Set();
+
   const mapEl=document.getElementById('sbMap');
   mapEl.style.display='block';
   if(!_sbMap){
@@ -2445,45 +2522,116 @@ function sbInitMap(lat,lng,results,radius,label,hqCoords,near,sbHqCoords){
   }
   if(_sbLayer){_sbLayer.clearLayers();}
   _sbLayer=L.layerGroup().addTo(_sbMap);
+  if(_sbRouteLayer){_sbRouteLayer.clearLayers();}
+  else{_sbRouteLayer=L.layerGroup().addTo(_sbMap);}
 
   // Radius circle
-  L.circle([lat,lng],{radius:radius*1000,color:'#1f7a3f',weight:2,fillColor:'#1f7a3f',fillOpacity:.08}).addTo(_sbLayer);
+  L.circle([lat,lng],{radius:radius*1000,color:'#1f7a3f',weight:1.5,fillColor:'#1f7a3f',fillOpacity:.06}).addTo(_sbLayer);
 
-  // Construction site marker (red)
-  const bstIcon=L.divIcon({html:'<div style="width:18px;height:18px;border-radius:50%;background:#d11a2c;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,.3)"></div>',iconSize:[18,18],iconAnchor:[9,9]});
+  // Baustelle marker — großes B
+  const bstIcon=L.divIcon({html:'<div style="width:28px;height:28px;border-radius:50%;background:#d11a2c;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:white;font-family:sans-serif">B</div>',iconSize:[28,28],iconAnchor:[14,14]});
   L.marker([lat,lng],{icon:bstIcon}).addTo(_sbLayer).bindPopup(`<b>Baustelle</b><br>${esc(label)}`).openPopup();
 
-  // Quarry markers
-  results.forEach((r,i)=>{
-    const icon=L.divIcon({html:`<div style="width:${i===0?16:12}px;height:${i===0?16:12}px;border-radius:50%;background:${r.color};border:2px solid white;box-shadow:0 2px 4px rgba(0,0,0,.3)"></div>`,iconSize:[16,16],iconAnchor:[8,8]});
-    L.marker([r.lat,r.lng],{icon}).addTo(_sbLayer)
-      .bindPopup(`<b>${esc(r.name)}</b><br>${fmtKm(r.distKm)} km${r.durationMin?' · '+fmtDur(r.durationMin):''}<br><small>${esc(r.addr)}</small>`);
-  });
-
-  // Company marker (Hilgenroth)
-  const compIcon=L.divIcon({html:'<div style="width:20px;height:20px;border-radius:3px;background:#1a1d1f;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:10px;color:white">H</div>',iconSize:[20,20],iconAnchor:[10,10]});
+  // Hilgenroth HQ marker
+  const compIcon=L.divIcon({html:'<div style="width:20px;height:20px;border-radius:3px;background:#1a1d1f;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:10px;color:white;font-weight:700">H</div>',iconSize:[20,20],iconAnchor:[10,10]});
   L.marker([HILGENROTH.lat,HILGENROTH.lng],{icon:compIcon}).addTo(_sbLayer)
     .bindPopup(`<b>${esc(HILGENROTH.name)}</b><br><small>${esc(HILGENROTH.addr)}</small>`);
 
-  // Draw real route polylines (from ORS) or fallback dashed lines
-  if(hqCoords&&hqCoords.length)
-    L.polyline(hqCoords,{color:'#1a1d1f',weight:3,opacity:.7}).addTo(_sbLayer);
-  else
-    L.polyline([[HILGENROTH.lat,HILGENROTH.lng],[lat,lng]],{color:'#1a1d1f',weight:2,dashArray:'6 4',opacity:.5}).addTo(_sbLayer);
+  // Steinbruch-Marker — klickbar, mit farbigem Ring bei aktiv
+  results.forEach((r,i)=>{
+    const isBest=(i===0);
+    const sz=isBest?18:14;
+    const markerEl=document.createElement('div');
+    markerEl.id='sb-marker-'+i;
+    markerEl.style.cssText=`width:${sz}px;height:${sz}px;border-radius:50%;background:${r.color};border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,.35);cursor:pointer;transition:transform .15s,box-shadow .15s`;
+    const icon=L.divIcon({html:markerEl.outerHTML,iconSize:[sz,sz],iconAnchor:[sz/2,sz/2]});
+    const marker=L.marker([r.lat,r.lng],{icon}).addTo(_sbLayer);
+    marker.bindPopup(`<div style="min-width:160px"><b style="color:${r.color}">${esc(r.name)}</b><br><small style="color:#666">${esc(r.addr)}</small><hr style="margin:6px 0;border-color:#eee"><div style="font-size:12px">Bst→SB: <b>${fmtKm(r.dBstSb)} km</b>${r.durBstSb?' · '+fmtDur(r.durBstSb):''}</div><div style="font-size:12px">SB→HQ: <b>${fmtKm(r.dSbHQ)} km</b>${r.durSbHQ?' · '+fmtDur(r.durSbHQ):''}</div><div style="font-size:12px;margin-top:4px;font-weight:700;color:${r.detour<=0?'#1f7a3f':r.detour<=_sbRadius?'#EF9F27':'#d11a2c'}">Umweg: ${r.detour>=0?'+':''}${r.detour.toFixed(1)} km</div></div>`);
+    marker.on('click',()=>{
+      if(_sbActiveSet.has(i)){_sbActiveSet.delete(i);}else{_sbActiveSet.add(i);}
+      sbDrawRoutes();
+      sbUpdateLegend(results);
+      // Card-Styling sync
+      document.querySelectorAll('.sb-card').forEach((c,idx)=>{
+        const active=_sbActiveSet.has(idx);
+        c.style.outline=active?'2px solid '+_sbAllResults[idx].color:'';
+        c.style.background=active?_sbAllResults[idx].color+'15':'';
+      });
+    });
+  });
 
-  if(near&&near.routeCoords&&near.routeCoords.length)
-    L.polyline(near.routeCoords,{color:near.color,weight:3,opacity:.8}).addTo(_sbLayer);
-  else if(near)
-    L.polyline([[lat,lng],[near.lat,near.lng]],{color:near.color,weight:2,dashArray:'6 4',opacity:.6}).addTo(_sbLayer);
+  // Standard: nur HQ→Bst Hinfahrt
+  sbDrawRoutes();
 
-  if(sbHqCoords&&sbHqCoords.length)
-    L.polyline(sbHqCoords,{color:'#1f7a3f',weight:3,opacity:.6}).addTo(_sbLayer);
-  else if(near)
-    L.polyline([[near.lat,near.lng],[HILGENROTH.lat,HILGENROTH.lng]],{color:'#1f7a3f',weight:2,dashArray:'4 4',opacity:.4}).addTo(_sbLayer);
+  // Legende
+  sbBuildLegend(results);
 
   // Fit bounds
   const pts=[[lat,lng],[HILGENROTH.lat,HILGENROTH.lng],...results.map(r=>[r.lat,r.lng])];
   _sbMap.fitBounds(L.latLngBounds(pts),{padding:[30,30]});
+}
+
+window.sbClearSelection=function(){
+  _sbActiveSet.clear();
+  sbDrawRoutes();
+  if(_sbAllResults)sbUpdateLegend(_sbAllResults);
+  document.querySelectorAll('.sb-card').forEach(c=>{c.style.outline='';c.style.background='';});
+};
+function sbBuildLegend(results){
+  if(_sbMap._legendCtrl)_sbMap.removeControl(_sbMap._legendCtrl);
+  const legend=L.control({position:'bottomright'});
+  legend.onAdd=function(){
+    const div=L.DomUtil.create('div');
+    div.id='sb-legend-div';
+    div.style.cssText='background:rgba(255,255,255,.97);padding:10px 14px;border-radius:10px;font-size:11px;font-family:inherit;box-shadow:0 2px 10px rgba(0,0,0,.18);line-height:1.8;min-width:170px;max-width:200px';
+    sbUpdateLegend(results,null,div);
+    return div;
+  };
+  legend.addTo(_sbMap);
+  _sbMap._legendCtrl=legend;
+}
+
+window.sbCardClick=function(i){
+  if(_sbActiveSet.has(i)){_sbActiveSet.delete(i);}else{_sbActiveSet.add(i);}
+  sbDrawRoutes();
+  if(_sbAllResults)sbUpdateLegend(_sbAllResults);
+  // Karte auf alle aktiven Routen zoomen
+  if(_sbActiveSet.size>0&&_sbMap){
+    const pts=[[_sbLat,_sbLng],[HILGENROTH.lat,HILGENROTH.lng]];
+    _sbActiveSet.forEach(idx=>{const r=_sbAllResults[idx];pts.push([r.lat,r.lng]);});
+    _sbMap.fitBounds(L.latLngBounds(pts),{padding:[40,40]});
+  }
+  // Card-Styling aktualisieren
+  document.querySelectorAll('.sb-card').forEach((c,idx)=>{
+    const active=_sbActiveSet.has(idx);
+    c.style.outline=active?'2px solid '+_sbAllResults[idx].color:'';
+    c.style.background=active?_sbAllResults[idx].color+'15':'';
+  });
+};
+function sbUpdateLegend(results,_unused,divEl){
+  const div=divEl||document.getElementById('sb-legend-div');
+  if(!div)return;
+  const anyActive=_sbActiveSet.size>0;
+  let html='<div style="font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#555;margin-bottom:6px;padding-bottom:5px;border-bottom:1px solid #e5e7eb">Steinbrüche — Mehrfachauswahl</div>';
+  results.forEach((r,i)=>{
+    const isBest=(i===0);
+    const isActive=_sbActiveSet.has(i);
+    html+=`<div onclick="sbCardClick(${i})" style="display:flex;align-items:center;gap:7px;padding:3px 5px;border-radius:5px;cursor:pointer;${isActive?'background:'+r.color+'20;font-weight:700;':''}${!isActive&&anyActive?'opacity:.5':''}transition:all .15s">
+      <div style="width:14px;height:14px;border-radius:3px;border:2px solid ${r.color};background:${isActive?r.color:'transparent'};flex-shrink:0;display:flex;align-items:center;justify-content:center">
+        ${isActive?'<svg width="8" height="8" viewBox="0 0 10 10"><polyline points="1,5 4,8 9,2" stroke="white" stroke-width="2" fill="none"/></svg>':''}
+      </div>
+      <div style="width:20px;height:3px;background:${r.color};border-radius:2px;flex-shrink:0"></div>
+      <span style="font-size:11px;color:${isActive?r.color:'inherit'}">${r.name}</span>
+      ${isBest?'<span style="font-size:9px;background:'+r.color+';color:white;padding:1px 5px;border-radius:4px;flex-shrink:0;margin-left:auto">★</span>':''}
+    </div>`;
+  });
+  html+='<div style="margin-top:7px;border-top:1px solid #e5e7eb;padding-top:5px;font-size:10px;color:#999">';
+  if(!anyActive)
+    html+='→ Karte oder Card anklicken';
+  else
+    html+=`<b style="color:#333">${_sbActiveSet.size}</b> ausgewählt · <span style="cursor:pointer;color:#d11a2c" onclick="sbClearSelection()">Alle abwählen ✕</span>`;
+  html+='</div>';
+  div.innerHTML=html;
 }
 
 // Rebuild select when baustellen change
