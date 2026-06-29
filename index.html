@@ -2202,13 +2202,13 @@ const HILGENROTH = {name:'Rudolf Hilgenroth GmbH & Co.', addr:'Osterfeld 1, 5984
 // Others geocoded via Nominatim on first open
 const STEINBRUECHE_DEF = [
   // Koordinaten hartkodiert und manuell verifiziert – kein Nominatim-Geocoding
-  {name:'Diabaswerk Halbeswig', addr:'Halbeswig 100, 59909 Bestwig',          lat:51.32737,  lng:8.38927,  color:'#d11a2c'},
+  {name:'Diabaswerk Halbeswig', addr:'Halbeswig 100, 59909 Bestwig',          lat:51.328080, lng:8.383803, color:'#d11a2c'},
   {name:'Mineral Berge',        addr:'Zur Winnschla 36, 59872 Meschede',      lat:51.34180,  lng:8.33890,  color:'#EF9F27'},
   {name:'Ebel',                 addr:'Gut Habbel 1, 59757 Arnsberg',          lat:51.407433, lng:7.980235, color:'#1a5ab8'},
-  {name:'Lanwehr',              addr:'Am Langen Stück 1, 59757 Arnsberg',     lat:51.398507, lng:8.010758, color:'#1f7a3f'},
+  {name:'Lanwehr',              addr:'Am Langen Stück 1, 59757 Arnsberg',     lat:51.398460, lng:8.010779, color:'#1f7a3f'},
   {name:'Calcit',               addr:'Deinstrop 1D, 59757 Arnsberg',          lat:51.39422,  lng:7.90022,  color:'#8B5CF6'},
   {name:'WGU Berge',            addr:'Winnschla 8, 59872 Meschede',           lat:51.34230,  lng:8.33560,  color:'#EC4899'},
-  {name:'Lhoist',               addr:'Hönnetalstraße 74, 58710 Menden',       lat:51.400383, lng:7.841124, color:'#06B6D4'},
+  {name:'Lhoist',               addr:'Hönnetalstraße 74, 58710 Menden',       lat:51.400370, lng:7.841103, color:'#06B6D4'},
 ];
 let STEINBRUECHE=[...STEINBRUECHE_DEF];
 let _sbGeocoded=false;
@@ -2226,17 +2226,21 @@ let _sbDirectLat=null,_sbDirectLng=null,_sbDirectLabel='';
 
 async function orsRoute(fromLng,fromLat,toLng,toLat){
   try{
-    const url=`https://api.openrouteservice.org/v2/directions/driving-car?api_key=${ORS_KEY}&start=${fromLng},${fromLat}&end=${toLng},${toLat}`;
-    const resp=await fetch(url,{headers:{'Accept':'application/json, application/geo+json'}});
+    // POST mit preference=shortest → kürzeste Strecke
+    const resp=await fetch('https://api.openrouteservice.org/v2/directions/driving-car/geojson',{
+      method:'POST',
+      headers:{'Content-Type':'application/json; charset=utf-8','Authorization':ORS_KEY},
+      body:JSON.stringify({coordinates:[[fromLng,fromLat],[toLng,toLat]],preference:'shortest'})
+    });
     if(!resp.ok)throw new Error('HTTP '+resp.status);
     const d=await resp.json();
     const feat=d&&d.features&&d.features[0];
     if(!feat)return null;
-    const seg=feat.properties&&feat.properties.segments&&feat.properties.segments[0];
-    if(!seg||seg.distance==null)return null;
+    const sum=feat.properties&&feat.properties.summary;
+    if(!sum||sum.distance==null)return null;
     return{
-      distKm:seg.distance/1000,
-      durationMin:Math.round(seg.duration/60),
+      distKm:sum.distance/1000,
+      durationMin:Math.round(sum.duration/60),
       coords:(feat.geometry&&feat.geometry.coordinates||[]).map(c=>[c[1],c[0]])
     };
   }catch(e){return null;}
@@ -2528,12 +2532,12 @@ function sbInitMap(lat,lng,results,radius,label,hqCoords,near,sbHqCoords){
   // Radius circle
   L.circle([lat,lng],{radius:radius*1000,color:'#1f7a3f',weight:1.5,fillColor:'#1f7a3f',fillOpacity:.06}).addTo(_sbLayer);
 
-  // Baustelle marker — großes B
-  const bstIcon=L.divIcon({html:'<div style="width:28px;height:28px;border-radius:50%;background:#d11a2c;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:white;font-family:sans-serif">B</div>',iconSize:[28,28],iconAnchor:[14,14]});
+  // Baustelle marker
+  const bstIcon=L.divIcon({html:'<div style="width:28px;height:28px;border-radius:50%;background:white;border:3px solid #1a1d1f;box-shadow:0 2px 8px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:#1a1d1f;font-family:sans-serif;line-height:1">B</div>',iconSize:[28,28],iconAnchor:[14,14],className:''});
   L.marker([lat,lng],{icon:bstIcon}).addTo(_sbLayer).bindPopup(`<b>Baustelle</b><br>${esc(label)}`).openPopup();
 
-  // Hilgenroth HQ marker
-  const compIcon=L.divIcon({html:'<div style="width:20px;height:20px;border-radius:3px;background:#1a1d1f;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:10px;color:white;font-weight:700">H</div>',iconSize:[20,20],iconAnchor:[10,10]});
+  // Hilgenroth HQ marker — kleines H-Label ohne weißes Rechteck
+  const compIcon=L.divIcon({html:'<div style="width:22px;height:22px;border-radius:50%;background:#1a1d1f;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:11px;color:white;font-weight:800;font-family:sans-serif">H</div>',iconSize:[22,22],iconAnchor:[11,11],className:''});
   L.marker([HILGENROTH.lat,HILGENROTH.lng],{icon:compIcon}).addTo(_sbLayer)
     .bindPopup(`<b>${esc(HILGENROTH.name)}</b><br><small>${esc(HILGENROTH.addr)}</small>`);
 
@@ -2544,7 +2548,7 @@ function sbInitMap(lat,lng,results,radius,label,hqCoords,near,sbHqCoords){
     const markerEl=document.createElement('div');
     markerEl.id='sb-marker-'+i;
     markerEl.style.cssText=`width:${sz}px;height:${sz}px;border-radius:50%;background:${r.color};border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,.35);cursor:pointer;transition:transform .15s,box-shadow .15s`;
-    const icon=L.divIcon({html:markerEl.outerHTML,iconSize:[sz,sz],iconAnchor:[sz/2,sz/2]});
+    const icon=L.divIcon({html:markerEl.outerHTML,iconSize:[sz,sz],iconAnchor:[sz/2,sz/2],className:''});
     const marker=L.marker([r.lat,r.lng],{icon}).addTo(_sbLayer);
     marker.bindPopup(`<div style="min-width:160px"><b style="color:${r.color}">${esc(r.name)}</b><br><small style="color:#666">${esc(r.addr)}</small><hr style="margin:6px 0;border-color:#eee"><div style="font-size:12px">Bst→SB: <b>${fmtKm(r.dBstSb)} km</b>${r.durBstSb?' · '+fmtDur(r.durBstSb):''}</div><div style="font-size:12px">SB→HQ: <b>${fmtKm(r.dSbHQ)} km</b>${r.durSbHQ?' · '+fmtDur(r.durSbHQ):''}</div><div style="font-size:12px;margin-top:4px;font-weight:700;color:${r.detour<=0?'#1f7a3f':r.detour<=_sbRadius?'#EF9F27':'#d11a2c'}">Umweg: ${r.detour>=0?'+':''}${r.detour.toFixed(1)} km</div></div>`);
     marker.on('click',()=>{
