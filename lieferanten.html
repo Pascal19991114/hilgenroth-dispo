@@ -866,16 +866,17 @@ function loadSuppliers(){
   }
 
   // Sicherheitsnetz: falls Firebase aus irgendeinem Grund nicht antwortet,
-  // nach 6 Sekunden trotzdem die Standardliste anzeigen statt leer zu bleiben.
+  // nach 15 Sekunden trotzdem die Standardliste anzeigen statt leer zu bleiben
+  // (mobile Verbindungen brauchen oft länger als WLAN/Desktop).
   const fallbackTimer = setTimeout(()=>{
     if(!dataLoadedOnce){
-      console.warn("Firebase antwortet nicht – falle auf Standardliste zurück.");
-      document.getElementById('syncBanner').textContent = "⚠️ Verbindung zur Datenbank konnte nicht hergestellt werden – zeige Standardliste (offline).";
+      console.warn("Firebase antwortet noch nicht – zeige vorübergehend Standardliste.");
+      document.getElementById('syncBanner').textContent = "⚠️ Verbindung zur Datenbank konnte noch nicht hergestellt werden – zeige Standardliste (offline). Verbindet sich evtl. gleich noch im Hintergrund.";
       document.getElementById('syncBanner').classList.add('show');
       SUPPLIERS = DEFAULT_SUPPLIERS.map((s,i)=>({...s, id:"default_"+i}));
       afterDataLoaded();
     }
-  }, 6000);
+  }, 15000);
 
   const ref = db.ref('lieferanten');
   ref.once('value').then(snap=>{
@@ -891,10 +892,14 @@ function loadSuppliers(){
   }).then(()=>{
     // Live-Listener registrieren
     ref.on('value', snap=>{
+      const wasAlreadyLoaded = dataLoadedOnce;
       dataLoadedOnce = true;
       clearTimeout(fallbackTimer);
       const val = snap.val() || {};
       SUPPLIERS = Object.keys(val).map(key=>({id:key, ...val[key]}));
+      // Falls die Reserveliste schon (wegen Timeout) angezeigt wurde und Firebase
+      // sich jetzt doch noch verbindet: Warnbanner wieder entfernen.
+      document.getElementById('syncBanner').classList.remove('show');
       afterDataLoaded();
     });
   }).catch(err=>{
