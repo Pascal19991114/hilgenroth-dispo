@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<title>Hilgenroth Lieferanten-Finder</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
+<!-- Firebase (compat SDK, gleiche Version wie in der Hilgenroth-Dispo-App) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<style>
+  :root{
+    --dark:#2b2d31;
+    --coral:#e8503a;
+    --coral-dark:#c43f2c;
+    --bg:#f4f3f1;
+    --card:#ffffff;
+    --text:#2b2d31;
+    --muted:#6b6f76;
+    --border:#e3e1de;
+    --header-h: 64px;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{margin:0; padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  header{
+    background:var(--dark);
+    color:#fff;
+    padding:8px 14px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    position:sticky;
+    top:0;
+    z-index:1000;
+    min-height:var(--header-h);
+  }
+  .header-left{ display:flex; align-items:center; gap:10px; min-width:0; }
+  .header-left img{ height:34px; width:auto; display:block; flex-shrink:0; }
+  header h1{
+    font-size:15px;
+    margin:0;
+    font-weight:700;
+    letter-spacing:.2px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  header h1 span{color:var(--coral);}
+  .header-right{ display:flex; align-items:center; gap:6px; flex-shrink:0; }
+  .tabs{ display:flex; gap:6px; }
+  .tab-btn{
+    background:transparent;
+    border:1px solid rgba(255,255,255,.25);
+    color:#fff;
+    padding:8px 12px;
+    border-radius:20px;
+    font-size:12.5px;
+    cursor:pointer;
+    transition:.15s;
+    white-space:nowrap;
+  }
+  .tab-btn.active{ background:var(--coral); border-color:var(--coral); }
+  .edit-toggle-btn{
+    background:transparent;
+    border:1px solid rgba(255,255,255,.25);
+    color:#fff;
+    width:36px; height:36px;
+    border-radius:50%;
+    cursor:pointer;
+    font-size:16px;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .edit-toggle-btn.on{ background:var(--coral); border-color:var(--coral); }
+
+  main{ padding:12px; max-width:900px; margin:0 auto; }
+  .view{display:none;}
+  .view.active{display:block;}
+
+  .sync-banner{
+    background:#fff3ee;
+    border:1px solid #f3c9b9;
+    color:var(--coral-dark);
+    font-size:12.5px;
+    padding:8px 12px;
+    border-radius:8px;
+    margin-bottom:10px;
+    display:none;
+  }
+  .sync-banner.show{display:block;}
+
+  .locate-bar{
+    background:var(--card);
+    border-radius:12px;
+    padding:14px;
+    margin-bottom:10px;
+    box-shadow:0 1px 3px rgba(0,0,0,.08);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .locate-btn{
+    background:var(--coral);
+    color:#fff;
+    border:none;
+    padding:12px 18px;
+    border-radius:8px;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    min-height:44px;
+  }
+  .locate-btn:active{background:var(--coral-dark);}
+  .locate-status{font-size:12.5px; color:var(--muted); flex:1; min-width:140px;}
+  #map{
+    height:300px;
+    border-radius:12px;
+    overflow:hidden;
+    box-shadow:0 1px 3px rgba(0,0,0,.08);
+    margin-bottom:12px;
+  }
+  .filter-row{ display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+  .filter-chip{
+    background:var(--card);
+    border:1px solid var(--border);
+    padding:8px 13px;
+    border-radius:20px;
+    font-size:13px;
+    cursor:pointer;
+    color:var(--text);
+    min-height:38px;
+    display:flex; align-items:center;
+  }
+  .filter-chip.active{ background:var(--dark); color:#fff; border-color:var(--dark); }
+
+  .nearest-card{
+    background:var(--card);
+    border-radius:12px;
+    padding:16px;
+    margin-bottom:10px;
+    box-shadow:0 1px 3px rgba(0,0,0,.08);
+    border-left:4px solid var(--coral);
+  }
+  .nc-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+  .nc-name{font-weight:700; font-size:15px; margin:0 0 2px 0;}
+  .nc-cat{
+    display:inline-block; font-size:11px; background:var(--bg); color:var(--muted);
+    padding:2px 8px; border-radius:10px; margin-top:4px;
+  }
+  .nc-dist{ font-weight:700; color:var(--coral-dark); font-size:14px; white-space:nowrap; }
+  .nc-rank{ font-size:11px; color:var(--muted); font-weight:600; }
+  .nc-body{margin-top:10px; font-size:13.5px; color:var(--text);}
+  .nc-row{display:flex; gap:6px; margin-bottom:3px; color:var(--muted);}
+  .nc-row b{color:var(--text); font-weight:600;}
+  .nc-actions{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+  .nc-actions a, .nc-actions button{
+    flex:1; min-width:90px; text-align:center; text-decoration:none;
+    padding:11px; border-radius:8px; font-size:13px; font-weight:600;
+    border:none; cursor:pointer; min-height:42px;
+  }
+  .btn-call{background:var(--coral); color:#fff;}
+  .btn-route{background:var(--dark); color:#fff;}
+  .btn-edit{background:#fff; color:var(--dark); border:1px solid var(--border) !important;}
+
+  .search-bar{
+    width:100%; padding:12px 14px; border-radius:10px; border:1px solid var(--border);
+    font-size:14px; margin-bottom:10px; background:var(--card);
+  }
+  .list-card{
+    background:var(--card); border-radius:10px; padding:13px 15px; margin-bottom:8px;
+    box-shadow:0 1px 2px rgba(0,0,0,.06);
+  }
+  .list-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+  .list-name{font-weight:700; font-size:14.5px;}
+  .list-cat{font-size:11px; color:var(--muted);}
+  .list-dist{font-size:12px; color:var(--coral-dark); font-weight:700; white-space:nowrap;}
+  .list-body{font-size:13px; color:var(--muted); margin-top:6px; line-height:1.5;}
+  .list-body b{color:var(--text);}
+  .list-actions{display:flex; gap:14px; margin-top:8px; flex-wrap:wrap;}
+  .list-actions a, .list-actions button{
+    font-size:12.5px; color:var(--coral-dark); text-decoration:none; font-weight:600;
+    background:none; border:none; padding:6px 0; cursor:pointer;
+  }
+  .list-actions button.edit-link{ color:var(--dark); }
+
+  .empty-state{ text-align:center; color:var(--muted); padding:30px 10px; font-size:14px; }
+  .leaflet-popup-content{font-size:13px;}
+
+  .add-fab{
+    position:fixed;
+    bottom:24px; right:24px;
+    width:56px; height:56px;
+    border-radius:50%;
+    background:var(--coral);
+    color:#fff;
+    border:none;
+    font-size:28px;
+    box-shadow:0 4px 12px rgba(0,0,0,.25);
+    cursor:pointer;
+    display:none;
+    align-items:center; justify-content:center;
+    z-index:900;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .add-fab.show{ display:flex; }
+
+  /* Modal */
+  .modal-overlay{
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,.5);
+    z-index:2000; align-items:flex-end; justify-content:center;
+  }
+  .modal-overlay.show{ display:flex; }
+  .modal-box{
+    background:#fff; width:100%; max-width:500px; border-radius:16px 16px 0 0;
+    padding:20px; max-height:88vh; overflow-y:auto;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
+  }
+  @media (min-width: 640px){
+    .modal-overlay{ align-items:center; }
+    .modal-box{ border-radius:16px; max-height:85vh; }
+  }
+  .modal-box h2{ font-size:17px; margin:0 0 14px 0; }
+  .form-row{ margin-bottom:12px; }
+  .form-row label{ display:block; font-size:12.5px; color:var(--muted); margin-bottom:4px; font-weight:600;}
+  .form-row input, .form-row select{
+    width:100%; padding:11px 12px; border:1px solid var(--border); border-radius:8px; font-size:14px;
+    background:#fafafa;
+  }
+  .form-row-2{ display:flex; gap:10px; }
+  .form-row-2 .form-row{ flex:1; }
+  .modal-actions{ display:flex; gap:10px; margin-top:16px; }
+  .modal-actions button{
+    flex:1; padding:13px; border-radius:8px; font-size:14px; font-weight:600; border:none; cursor:pointer; min-height:46px;
+  }
+  .btn-primary{ background:var(--coral); color:#fff; }
+  .btn-secondary{ background:var(--bg); color:var(--text); }
+  .btn-danger{ background:#fff; color:#c43f2c; border:1px solid #f3c9b9 !important; }
+  .modal-hint{ font-size:11.5px; color:var(--muted); margin-top:-4px; margin-bottom:10px; }
+  .kuerzel-banner{
+    background:#eef6ee; border:1px solid #cfe8cf; color:#2c6b2f; font-size:12.5px;
+    padding:8px 10px; border-radius:8px; margin-bottom:12px;
+  }
+
+  @media (max-width: 420px){
+    header h1{ font-size:13px; }
+    .header-left img{ height:28px; }
+    .tab-btn{ padding:7px 10px; font-size:12px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <img src="data:image/png;base64,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" alt="Hilgenroth Logo">
+    <h1>Lieferanten-<span>Finder</span></h1>
+  </div>
+  <div class="header-right">
+    <div class="tabs">
+      <button class="tab-btn active" data-view="mapview">Karte</button>
+      <button class="tab-btn" data-view="listview">Liste</button>
+    </div>
+    <button class="edit-toggle-btn" id="editToggleBtn" title="Bearbeitungsmodus">✏️</button>
+  </div>
+</header>
+
+<main>
+
+  <div class="sync-banner" id="syncBanner"></div>
+
+  <!-- MAP / NEAREST VIEW -->
+  <section id="mapview" class="view active">
+    <div class="locate-bar">
+      <button class="locate-btn" id="locateBtn">📍 Meinen Standort verwenden</button>
+      <div class="locate-status" id="locateStatus">Standort noch nicht ermittelt.</div>
+    </div>
+    <div class="locate-bar" style="margin-top:-4px;">
+      <input type="text" id="manualLocation" class="search-bar" style="margin:0;" placeholder="...oder PLZ / Ort manuell eingeben (z.B. 59846 Sundern)">
+      <button class="locate-btn" id="manualLocateBtn" style="background:var(--dark);">Suchen</button>
+    </div>
+
+    <div id="map"></div>
+
+    <div class="filter-row" id="filterRow"></div>
+
+    <div id="nearestList"></div>
+  </section>
+
+  <!-- FULL LIST VIEW -->
+  <section id="listview" class="view">
+    <input type="text" class="search-bar" id="searchInput" placeholder="Suche nach Firma, Ort, PLZ oder Kategorie…">
+    <div class="filter-row" id="filterRowList"></div>
+    <div id="fullList"></div>
+  </section>
+
+</main>
+
+<button class="add-fab" id="addFab" title="Neuen Lieferanten hinzufügen">+</button>
+
+<!-- Modal: Kürzel-Abfrage -->
+<div class="modal-overlay" id="kuerzelModal">
+  <div class="modal-box">
+    <h2>Bearbeitungsmodus aktivieren</h2>
+    <p class="modal-hint">Bitte dein Kürzel eingeben. Jede Änderung wird mit diesem Kürzel gespeichert, damit nachvollziehbar bleibt, wer was geändert hat.</p>
+    <div class="form-row">
+      <label>Dein Kürzel (z. B. RH, PK, ...)</label>
+      <input type="text" id="kuerzelInput" maxlength="6" placeholder="Kürzel" style="text-transform:uppercase;">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" id="kuerzelCancel">Abbrechen</button>
+      <button class="btn-primary" id="kuerzelConfirm">Bearbeitungsmodus an</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Lieferant bearbeiten / hinzufügen -->
+<div class="modal-overlay" id="supplierModal">
+  <div class="modal-box">
+    <h2 id="supplierModalTitle">Lieferant bearbeiten</h2>
+    <div class="kuerzel-banner" id="kuerzelBanner"></div>
+    <div class="form-row">
+      <label>Firmenname *</label>
+      <input type="text" id="f_name">
+    </div>
+    <div class="form-row">
+      <label>Kategorie *</label>
+      <select id="f_cat">
+        <option value="Betonwerk">Betonwerk</option>
+        <option value="Asphaltwerk">Asphaltwerk</option>
+        <option value="Steinbruch / Straßenbaustoffe">Steinbruch / Straßenbaustoffe</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label>Ansprechpartner</label>
+      <input type="text" id="f_contact">
+    </div>
+    <div class="form-row">
+      <label>Telefonnummer *</label>
+      <input type="text" id="f_phone" placeholder="+49 ...">
+    </div>
+    <div class="form-row">
+      <label>Straße &amp; Hausnr.</label>
+      <input type="text" id="f_street">
+    </div>
+    <div class="form-row-2">
+      <div class="form-row">
+        <label>PLZ</label>
+        <input type="text" id="f_plz">
+      </div>
+      <div class="form-row" style="flex:2;">
+        <label>Ort *</label>
+        <input type="text" id="f_ort">
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Koordinaten (für Kartenanzeige)</label>
+      <div class="form-row-2">
+        <input type="text" id="f_lat" placeholder="Breitengrad (Lat)">
+        <input type="text" id="f_lon" placeholder="Längengrad (Lon)">
+      </div>
+      <div class="modal-hint" style="margin-top:6px;">Leer lassen und auf „Koordinaten suchen“ klicken – ermittelt sie automatisch aus Adresse/Ort.</div>
+      <button class="btn-secondary" id="geocodeBtn" style="padding:10px; border-radius:8px; border:none; font-size:13px; cursor:pointer; width:100%;">📍 Koordinaten aus Adresse suchen</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" id="supplierCancel">Abbrechen</button>
+      <button class="btn-primary" id="supplierSave">Speichern</button>
+    </div>
+    <div class="modal-actions" id="deleteRow" style="display:none;">
+      <button class="btn-danger" id="supplierDelete" style="width:100%;">Lieferant löschen</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// =====================================================================
+// FIREBASE KONFIGURATION
+// WICHTIG: Hier die eigenen Firebase-Projektdaten eintragen!
+// (Siehe Anleitung im Chat – am einfachsten dasselbe Firebase-Projekt
+//  wie bei der Hilgenroth-Dispo-App verwenden, nur einen neuen
+//  Datenbank-Pfad "lieferanten" benutzen.)
+// =====================================================================
+const firebaseConfig = {
+  apiKey: "DEIN_API_KEY",
+  authDomain: "DEIN_PROJEKT.firebaseapp.com",
+  databaseURL: "https://DEIN_PROJEKT-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "DEIN_PROJEKT",
+  storageBucket: "DEIN_PROJEKT.appspot.com",
+  messagingSenderId: "...",
+  appId: "..."
+};
+
+let db = null;
+let firebaseReady = false;
+const cfgLooksLikePlaceholder =
+  !firebaseConfig.apiKey ||
+  firebaseConfig.apiKey.includes("DEIN_") ||
+  firebaseConfig.databaseURL.includes("DEIN_PROJEKT");
+
+if(!cfgLooksLikePlaceholder){
+  try {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.database();
+    firebaseReady = true;
+  } catch(e) {
+    console.error("Firebase Init fehlgeschlagen:", e);
+  }
+} else {
+  console.warn("Firebase-Konfiguration ist noch nicht eingetragen (Platzhalterwerte gefunden) – App startet im Offline-Modus mit der Standardliste.");
+}
+
+// ===== STANDARD-DATENSATZ (wird nur verwendet, wenn die Firebase-DB noch leer ist) =====
+const DEFAULT_SUPPLIERS = [
+  {
+    "name": "Hilgenroth Rudolf GmbH & Co. KG",
+    "cat": "Betonwerk",
+    "contact": "Rudolf Hilgenroth",
+    "phone": "+49 2934 96260",
+    "street": "Osterfeld 1",
+    "plz": "59846",
+    "ort": "Sundern",
+    "lat": 51.2984,
+    "lon": 8.0124
+  },
+  {
+    "name": "Heinrich Ebel GmbH & Co. KG",
+    "cat": "Steinbruch / Straßenbaustoffe",
+    "contact": "Florian Brinkschulte",
+    "phone": "+49 2932 96890",
+    "street": "Gut Habbel 1",
+    "plz": "59757",
+    "ort": "Arnsberg",
+    "lat": 51.4112,
+    "lon": 7.9823
+  },
+  {
+    "name": "Lanwehr Naturstein GmbH & Co. KG",
+    "cat": "Steinbruch / Straßenbaustoffe",
+    "contact": "Vertriebsleitung",
+    "phone": "+49 2932 24044",
+    "street": "Hellefelder Str. 100",
+    "plz": "59759",
+    "ort": "Arnsberg",
+    "lat": 51.3789,
+    "lon": 8.0412
+  },
+  {
+    "name": "BERDING BETON GmbH",
+    "cat": "Betonwerk",
+    "contact": "Hr. Jansen (Vertrieb)",
+    "phone": "+49 2932 96090",
+    "street": "Hüttenstr. 13",
+    "plz": "59759",
+    "ort": "Arnsberg",
+    "lat": 51.4552,
+    "lon": 7.9612
+  },
+  {
+    "name": "Transportbeton-Westenfeld GmbH",
+    "cat": "Betonwerk",
+    "contact": "Hr. Westenfeld",
+    "phone": "+49 2932 97410",
+    "street": "Möhnestr. 141",
+    "plz": "59755",
+    "ort": "Arnsberg",
+    "lat": 51.4621,
+    "lon": 7.9945
+  },
+  {
+    "name": "Sauerländer Bau- und Transportbeton",
+    "cat": "Betonwerk",
+    "contact": "Markus Schmidt",
+    "phone": "+49 291 952930",
+    "street": "Im Schlahn 4",
+    "plz": "59872",
+    "ort": "Meschede",
+    "lat": 51.3325,
+    "lon": 8.2415
+  },
+  {
+    "name": "AMW Asphaltmischwerke Westfalen",
+    "cat": "Asphaltwerk",
+    "contact": "Vertrieb Asphalt",
+    "phone": "+49 231 907030",
+    "street": "Kanalstraße 45",
+    "plz": "44147",
+    "ort": "Dortmund",
+    "lat": 51.5298,
+    "lon": 7.4452
+  },
+  {
+    "name": "Steinbruch Schulte Grauwacke",
+    "cat": "Steinbruch / Straßenbaustoffe",
+    "contact": "Vertriebs-Team",
+    "phone": "+49 2763 6039",
+    "street": "Heerstraße 26",
+    "plz": "57489",
+    "ort": "Drolshagen",
+    "lat": 51.0423,
+    "lon": 7.7315
+  },
+  {
+    "name": "CEMEX Deutschland AG - Werk Hagen",
+    "cat": "Betonwerk",
+    "contact": "Kunden-Service",
+    "phone": "+49 2331 3640",
+    "street": "Kabeler Str. 54",
+    "plz": "58099",
+    "ort": "Hagen",
+    "lat": 51.4021,
+    "lon": 7.4812
+  },
+  {
+    "name": "Asphaltmischwerk Sauerland GmbH",
+    "cat": "Asphaltwerk",
+    "contact": "Hr. Beckmann",
+    "phone": "+49 2961 97720",
+    "street": "Rösenbecker Str. 12",
+    "plz": "59929",
+    "ort": "Brilon",
+    "lat": 51.4012,
+    "lon": 8.6145
+  },
+  {
+    "name": "Heidelberg Materials AG",
+    "cat": "Betonwerk",
+    "contact": "Zentraler Vertrieb",
+    "phone": "+49 2941 28680",
+    "street": "Südstraße 22",
+    "plz": "59557",
+    "ort": "Lippstadt",
+    "lat": 51.6624,
+    "lon": 8.3512
+  },
+  {
+    "name": "Basalt-Actien-Gesellschaft",
+    "cat": "Steinbruch / Straßenbaustoffe",
+    "contact": "Hr. Müller (Verkauf)",
+    "phone": "+49 271 33070",
+    "street": "Eiserntalstraße 151",
+    "plz": "57080",
+    "ort": "Siegen",
+    "lat": 50.8425,
+    "lon": 8.0314
+  },
+  {
+    "name": "HOCHTIEF Infrastructure GmbH",
+    "cat": "Asphaltwerk",
+    "contact": "Verkaufsleitung",
+    "phone": "+49 201 8240",
+    "street": "Opernplatz 2",
+    "plz": "45128",
+    "ort": "Essen",
+    "lat": 51.4485,
+    "lon": 7.0124
+  },
+  {
+    "name": "Holcim Beton und Betonwaren",
+    "cat": "Betonwerk",
+    "contact": "Regionaler Vertrieb",
+    "phone": "+49 2381 9150",
+    "street": "Radbodstraße 21",
+    "plz": "59075",
+    "ort": "Hamm",
+    "lat": 51.6812,
+    "lon": 7.7854
+  },
+  {
+    "name": "Bickhardt Bau Ruhr GmbH",
+    "cat": "Asphaltwerk",
+    "contact": "Hr. Klein",
+    "phone": "+49 2306 204010",
+    "street": "Dortmunder Str. 110",
+    "plz": "44536",
+    "ort": "Lünen",
+    "lat": 51.5942,
+    "lon": 7.5124
+  },
+  {
+    "name": "Klösters Baustoffe GmbH",
+    "cat": "Steinbruch / Straßenbaustoffe",
+    "contact": "Frau Schneider",
+    "phone": "+49 203 31850",
+    "street": "Am Parallelhafen 12",
+    "plz": "47059",
+    "ort": "Duisburg",
+    "lat": 51.4285,
+    "lon": 6.7451
+  },
+  {
+    "name": "Deutsche Asphalt GmbH",
+    "cat": "Asphaltwerk",
+    "contact": "Niederlassung West",
+    "phone": "+49 221 824 2490",
+    "street": "Alfred-Schütte-Allee 10",
+    "plz": "50679",
+    "ort": "Köln",
+    "lat": 50.9254,
+    "lon": 6.9851
+  },
+  {
+    "name": "Lhoist Germany - Rheinkalk GmbH",
+    "cat": "Steinbruch / Straßenbaustoffe",
+    "contact": "Vertrieb Industrie/Bau",
+    "phone": "+49 2058 170",
+    "street": "Am Kalkstein 1",
+    "plz": "42489",
+    "ort": "Wülfrath",
+    "lat": 51.2845,
+    "lon": 7.0412
+  },
+  {
+    "name": "Remondis Baustoff Recycling",
+    "cat": "Steinbruch / Straßenbaustoffe",
+    "contact": "Vertriebsteam",
+    "phone": "+49 2306 1060",
+    "street": "Brunnenstraße 138",
+    "plz": "44536",
+    "ort": "Lünen",
+    "lat": 51.6112,
+    "lon": 7.5312
+  },
+  {
+    "name": "Readymix Transportbeton",
+    "cat": "Betonwerk",
+    "contact": "Disposition/Vertrieb",
+    "phone": "+49 209 3800",
+    "street": "Gelsenkirchener Str. 10",
+    "plz": "45881",
+    "ort": "Gelsenkirchen",
+    "lat": 51.5214,
+    "lon": 7.0915
+  },
+  {
+    "name": "Bernhard Mühlenbein Kalksteinbrüche-Rösenbeck GmbH & Co. KG",
+    "cat": "Steinbruch / Straßenbaustoffe",
+    "contact": "Vertrieb / Büro",
+    "phone": "+49 2963 9662-0",
+    "street": "Im Steinborn 16",
+    "plz": "59929",
+    "ort": "Brilon-Rösenbeck",
+    "lat": 51.359,
+    "lon": 8.6195
+  },
+  {
+    "name": "Briloner Hartsteinwerk GmbH & Co. KG",
+    "cat": "Steinbruch / Straßenbaustoffe",
+    "contact": "Vertrieb",
+    "phone": "+49 2961 96282",
+    "street": "In der Einzel 1",
+    "plz": "59929",
+    "ort": "Brilon",
+    "lat": 51.398,
+    "lon": 8.5755
+  },
+  {
+    "name": "Sauerländer Hartkalkstein-Industrie GmbH",
+    "cat": "Steinbruch / Straßenbaustoffe",
+    "contact": "Vertrieb",
+    "phone": "+49 5971 160240",
+    "street": "Almer Str. 61",
+    "plz": "59929",
+    "ort": "Brilon-Alme",
+    "lat": 51.343,
+    "lon": 8.648
+  },
+  {
+    "name": "Weiken Kalksteinbrüche u. Schotterwerk GmbH & Co. KG, Fritz",
+    "cat": "Steinbruch / Straßenbaustoffe",
+    "contact": "Vertrieb",
+    "phone": "+49 2902 8044",
+    "street": "Kreisstr. 48",
+    "plz": "59581",
+    "ort": "Warstein-Suttrop",
+    "lat": 51.4625,
+    "lon": 8.332
+  },
+  {
+    "name": "Steinwerke F. J. Risse GmbH & Co. KG",
+    "cat": "Steinbruch / Straßenbaustoffe",
+    "contact": "Vertrieb",
+    "phone": "+49 2902 8033",
+    "street": "Hauptstr. 34",
+    "plz": "59581",
+    "ort": "Warstein",
+    "lat": 51.4421,
+    "lon": 8.346
+  },
+  {
+    "name": "Westf. Muschelkalk-Steinbruch Joh. Blome GmbH & Co. KG",
+    "cat": "Steinbruch / Straßenbaustoffe",
+    "contact": "Vertrieb",
+    "phone": "+49 2992 970",
+    "street": "Oesterstr. 24",
+    "plz": "34431",
+    "ort": "Marsberg",
+    "lat": 51.453,
+    "lon": 8.852
+  },
+  {
+    "name": "Natursteinwerk Rinsche",
+    "cat": "Steinbruch / Straßenbaustoffe",
+    "contact": "Vertrieb",
+    "phone": "+49 2947 1326",
+    "street": "Soestkamp",
+    "plz": "59609",
+    "ort": "Anröchte",
+    "lat": 51.6325,
+    "lon": 8.3268
+  },
+  {
+    "name": "Heinrich Rohde Diabaswerk & Asphaltmischanlage",
+    "cat": "Asphaltwerk",
+    "contact": "Vertrieb",
+    "phone": "+49 2985 975433",
+    "street": "Am Steinbruch 7",
+    "plz": "33181",
+    "ort": "Bad Wünnenberg",
+    "lat": 51.521,
+    "lon": 8.734
+  },
+  {
+    "name": "Westdeutsche Grauwacke-Union GmbH – Werk Berge",
+    "cat": "Steinbruch / Straßenbaustoffe",
+    "contact": "Herr Gregor Ebbert (Vertrieb)",
+    "phone": "+49 2961 9737-33",
+    "street": "Zur Winnschla",
+    "plz": "59872",
+    "ort": "Meschede-Berge",
+    "lat": 51.342,
+    "lon": 8.315
+  },
+  {
+    "name": "Westdeutsche Grauwacke-Union GmbH – Werk Silbach",
+    "cat": "Steinbruch / Straßenbaustoffe",
+    "contact": "Herr Gregor Ebbert (Vertrieb)",
+    "phone": "+49 2983 8001",
+    "street": "Bergfreiheit 2",
+    "plz": "59955",
+    "ort": "Winterberg-Silbach",
+    "lat": 51.196,
+    "lon": 8.476
+  },
+  {
+    "name": "Westdeutsche Grauwacke-Union GmbH – Werk Bilstein",
+    "cat": "Steinbruch / Straßenbaustoffe",
+    "contact": "Herr Gregor Ebbert (Vertrieb)",
+    "phone": "+49 2961 973711",
+    "street": "Am Bilstein 1",
+    "plz": "59929",
+    "ort": "Brilon",
+    "lat": 51.43,
+    "lon": 8.56
+  },
+  {
+    "name": "Mineral Baustoff GmbH – Werk Berge",
+    "cat": "Steinbruch / Straßenbaustoffe",
+    "contact": "Vertrieb",
+    "phone": "+49 2903 41270",
+    "street": "Zur Winnschla 23",
+    "plz": "59872",
+    "ort": "Meschede-Berge",
+    "lat": 51.3415,
+    "lon": 8.314
+  },
+  {
+    "name": "Diabaswerk Halbeswig GmbH & Co. KG",
+    "cat": "Steinbruch / Straßenbaustoffe",
+    "contact": "Vertrieb",
+    "phone": "+49 2904 9712-0",
+    "street": "Halbeswig",
+    "plz": "59909",
+    "ort": "Bestwig-Halbeswig",
+    "lat": 51.345,
+    "lon": 8.53
+  }
+];
+
+const CAT_COLORS = {
+  "Betonwerk": "#e8503a",
+  "Asphaltwerk": "#2b2d31",
+  "Steinbruch / Straßenbaustoffe": "#8a8d92"
+};
+
+// ===== STATE =====
+let SUPPLIERS = [];           // aktuelle Liste (aus Firebase oder Default)
+let userPos = null;
+let activeCat = "Alle";
+let map, userMarker, markers = [];
+let editMode = false;
+let myKuerzel = "";
+let editingId = null;         // id des gerade bearbeiteten Lieferanten (null = neu)
+
+// ===== UTILS =====
+function haversine(lat1, lon1, lat2, lon2){
+  const R = 6371;
+  const dLat = (lat2-lat1) * Math.PI/180;
+  const dLon = (lon2-lon1) * Math.PI/180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+function telHref(p){ return "tel:" + p.replace(/[^+\d]/g,""); }
+function mapsHref(s, plz, ort){
+  return "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(s+", "+plz+" "+ort) + "&travelmode=driving";
+}
+function escapeHtml(str){
+  if(!str) return "";
+  return str.replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+}
+
+// ===== FIREBASE DATEN LADEN =====
+let dataLoadedOnce = false;
+
+function loadSuppliers(){
+  if(!firebaseReady){
+    document.getElementById('syncBanner').textContent = "⚠️ Firebase ist noch nicht eingerichtet – Liste läuft im Offline-Modus, Änderungen werden NICHT gespeichert. Siehe Einrichtungsanleitung.";
+    document.getElementById('syncBanner').classList.add('show');
+    SUPPLIERS = DEFAULT_SUPPLIERS.map((s,i)=>({...s, id:"default_"+i}));
+    afterDataLoaded();
+    return;
+  }
+
+  // Sicherheitsnetz: falls Firebase aus irgendeinem Grund nicht antwortet,
+  // nach 6 Sekunden trotzdem die Standardliste anzeigen statt leer zu bleiben.
+  const fallbackTimer = setTimeout(()=>{
+    if(!dataLoadedOnce){
+      console.warn("Firebase antwortet nicht – falle auf Standardliste zurück.");
+      document.getElementById('syncBanner').textContent = "⚠️ Verbindung zur Datenbank konnte nicht hergestellt werden – zeige Standardliste (offline).";
+      document.getElementById('syncBanner').classList.add('show');
+      SUPPLIERS = DEFAULT_SUPPLIERS.map((s,i)=>({...s, id:"default_"+i}));
+      afterDataLoaded();
+    }
+  }, 6000);
+
+  const ref = db.ref('lieferanten');
+  ref.once('value').then(snap=>{
+    if(!snap.exists()){
+      // DB ist leer -> einmalig mit Standarddaten befüllen
+      const updates = {};
+      DEFAULT_SUPPLIERS.forEach(s=>{
+        const newRef = ref.push();
+        updates[newRef.key] = s;
+      });
+      return ref.update(updates);
+    }
+  }).then(()=>{
+    // Live-Listener registrieren
+    ref.on('value', snap=>{
+      dataLoadedOnce = true;
+      clearTimeout(fallbackTimer);
+      const val = snap.val() || {};
+      SUPPLIERS = Object.keys(val).map(key=>({id:key, ...val[key]}));
+      afterDataLoaded();
+    });
+  }).catch(err=>{
+    clearTimeout(fallbackTimer);
+    console.error(err);
+    document.getElementById('syncBanner').textContent = "⚠️ Firebase-Fehler: " + err.message + " – zeige Standardliste (offline).";
+    document.getElementById('syncBanner').classList.add('show');
+    SUPPLIERS = DEFAULT_SUPPLIERS.map((s,i)=>({...s, id:"default_"+i}));
+    afterDataLoaded();
+  });
+}
+
+function afterDataLoaded(){
+  buildFilterRow(document.getElementById("filterRow"), ()=>{ plotMarkers(); renderNearest(); });
+  buildFilterRow(document.getElementById("filterRowList"), renderFullList);
+  plotMarkers();
+  renderNearest();
+  renderFullList();
+}
+
+// ===== TABS =====
+document.querySelectorAll(".tab-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+    document.getElementById(btn.dataset.view).classList.add("active");
+    if(btn.dataset.view === "mapview" && map){ setTimeout(()=>map.invalidateSize(), 100); }
+  });
+});
+
+// ===== FILTER CHIPS =====
+function buildFilterRow(container, onSelect){
+  const cats = ["Alle", "Betonwerk", "Asphaltwerk", "Steinbruch / Straßenbaustoffe"];
+  container.innerHTML = "";
+  cats.forEach(c=>{
+    const chip = document.createElement("div");
+    chip.className = "filter-chip" + (c === activeCat ? " active" : "");
+    chip.textContent = c;
+    chip.addEventListener("click", ()=>{
+      activeCat = c;
+      document.querySelectorAll(".filter-chip").forEach(ch=>ch.classList.toggle("active", ch.textContent===c));
+      onSelect();
+    });
+    container.appendChild(chip);
+  });
+}
+
+// ===== MAP INIT =====
+function initMap(){
+  map = L.map('map').setView([51.40, 8.05], 9);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap'
+  }).addTo(map);
+}
+
+function plotMarkers(){
+  markers.forEach(m=>map.removeLayer(m));
+  markers = [];
+  SUPPLIERS.forEach(s=>{
+    if(activeCat !== "Alle" && s.cat !== activeCat) return;
+    if(s.lat == null || s.lon == null) return;
+    const color = CAT_COLORS[s.cat] || "#2b2d31";
+    const marker = L.circleMarker([s.lat, s.lon], {
+      radius:8, fillColor:color, color:"#fff", weight:2, fillOpacity:0.9
+    }).addTo(map);
+    marker.bindPopup(`<b>${escapeHtml(s.name)}</b><br>${escapeHtml(s.cat)}<br>${escapeHtml(s.street||"")}, ${escapeHtml(s.plz||"")} ${escapeHtml(s.ort||"")}<br>${escapeHtml(s.contact||"")} · ${escapeHtml(s.phone||"")}`);
+    markers.push(marker);
+  });
+}
+
+// ===== LOCATE =====
+function setUserPos(lat, lon, label){
+  userPos = {lat, lon};
+  document.getElementById("locateStatus").textContent = label || "Standort gefunden ✓";
+  if(userMarker) map.removeLayer(userMarker);
+  userMarker = L.marker([userPos.lat, userPos.lon], {
+    icon: L.divIcon({className:'', html:'<div style="background:#2b2d31;width:16px;height:16px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px #2b2d31;"></div>', iconSize:[16,16]})
+  }).addTo(map).bindPopup("Dein Standort");
+  map.setView([userPos.lat, userPos.lon], 11);
+  renderNearest();
+  renderFullList();
+}
+
+function tryGeolocation(highAccuracy){
+  const status = document.getElementById("locateStatus");
+  navigator.geolocation.getCurrentPosition(pos=>{
+    setUserPos(pos.coords.latitude, pos.coords.longitude, "Standort gefunden ✓");
+  }, err=>{
+    if(highAccuracy){
+      status.textContent = "Erneuter Versuch (ungenaue Ortung)…";
+      tryGeolocation(false);
+    } else {
+      status.textContent = "Standort nicht ermittelbar (" + err.message + "). Bitte PLZ/Ort unten manuell eingeben.";
+    }
+  }, {enableHighAccuracy: highAccuracy, timeout: highAccuracy ? 8000 : 20000, maximumAge: 60000});
+}
+
+document.getElementById("locateBtn").addEventListener("click", ()=>{
+  const status = document.getElementById("locateStatus");
+  if(!navigator.geolocation){
+    status.textContent = "Geolokalisierung wird von diesem Gerät/Browser nicht unterstützt. Bitte PLZ/Ort manuell eingeben.";
+    return;
+  }
+  status.textContent = "Standort wird ermittelt…";
+  tryGeolocation(true);
+});
+
+document.getElementById("manualLocateBtn").addEventListener("click", geocodeManual);
+document.getElementById("manualLocation").addEventListener("keydown", e=>{
+  if(e.key === "Enter") geocodeManual();
+});
+
+async function geocodeManual(){
+  const q = document.getElementById("manualLocation").value.trim();
+  const status = document.getElementById("locateStatus");
+  if(!q){ status.textContent = "Bitte eine PLZ oder einen Ort eingeben."; return; }
+  status.textContent = "Suche „" + q + "“…";
+  try{
+    const url = "https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=de&q=" + encodeURIComponent(q);
+    const res = await fetch(url, {headers:{"Accept-Language":"de"}});
+    const data = await res.json();
+    if(data && data.length > 0){
+      setUserPos(parseFloat(data[0].lat), parseFloat(data[0].lon), "Standort gefunden: " + (data[0].display_name.split(",")[0]) + " ✓");
+    } else {
+      status.textContent = "Ort nicht gefunden. Bitte PLZ/Ort genauer eingeben.";
+    }
+  } catch(e){
+    status.textContent = "Adresssuche fehlgeschlagen (keine Internetverbindung zum Kartendienst?).";
+  }
+}
+
+// ===== NEAREST LIST =====
+function renderNearest(){
+  const container = document.getElementById("nearestList");
+  let list = SUPPLIERS.filter(s => activeCat==="Alle" || s.cat===activeCat);
+  if(!userPos){
+    container.innerHTML = '<div class="empty-state">Standort noch nicht ermittelt. Tippe oben auf „Meinen Standort verwenden“ oder gib PLZ/Ort ein.</div>';
+    return;
+  }
+  list = list.map(s => ({...s, dist: haversine(userPos.lat, userPos.lon, s.lat, s.lon)}))
+             .sort((a,b)=>a.dist-b.dist);
+
+  container.innerHTML = list.map((s, i)=>`
+    <div class="nearest-card">
+      <div class="nc-top">
+        <div>
+          <div class="nc-rank">${i===0 ? '🏆 NÄCHSTGELEGEN' : '#'+(i+1)}</div>
+          <p class="nc-name">${escapeHtml(s.name)}</p>
+          <span class="nc-cat">${escapeHtml(s.cat)}</span>
+        </div>
+        <div class="nc-dist">${s.dist.toFixed(1)} km</div>
+      </div>
+      <div class="nc-body">
+        <div class="nc-row"><b>Ansprechpartner:</b> ${escapeHtml(s.contact||"-")}</div>
+        <div class="nc-row"><b>Adresse:</b> ${escapeHtml(s.street||"")}, ${escapeHtml(s.plz||"")} ${escapeHtml(s.ort||"")}</div>
+      </div>
+      <div class="nc-actions">
+        <a class="btn-call" href="${telHref(s.phone)}">📞 Anrufen</a>
+        <a class="btn-route" href="${mapsHref(s.street,s.plz,s.ort)}" target="_blank" rel="noopener">🧭 Route</a>
+        ${editMode ? `<button class="btn-edit" onclick="openEditModal('${s.id}')">✏️ Bearbeiten</button>` : ''}
+      </div>
+    </div>
+  `).join("");
+}
+
+// ===== FULL LIST VIEW =====
+function renderFullList(){
+  const q = document.getElementById("searchInput").value.toLowerCase();
+  const container = document.getElementById("fullList");
+  let list = SUPPLIERS.filter(s => activeCat==="Alle" || s.cat===activeCat);
+  list = list.filter(s =>
+    (s.name||"").toLowerCase().includes(q) ||
+    (s.ort||"").toLowerCase().includes(q) ||
+    (s.plz||"").includes(q) ||
+    (s.cat||"").toLowerCase().includes(q)
+  );
+  if(userPos){
+    list = list.map(s=>({...s, dist: haversine(userPos.lat,userPos.lon,s.lat,s.lon)}))
+               .sort((a,b)=>a.dist-b.dist);
+  } else {
+    list = list.sort((a,b)=>(a.name||"").localeCompare(b.name||""));
+  }
+  if(list.length===0){
+    container.innerHTML = '<div class="empty-state">Keine Treffer.</div>';
+    return;
+  }
+  container.innerHTML = list.map(s=>`
+    <div class="list-card">
+      <div class="list-top">
+        <div>
+          <div class="list-name">${escapeHtml(s.name)}</div>
+          <div class="list-cat">${escapeHtml(s.cat)}</div>
+        </div>
+        ${s.dist!==undefined ? `<div class="list-dist">${s.dist.toFixed(1)} km</div>` : ''}
+      </div>
+      <div class="list-body">
+        <b>${escapeHtml(s.contact||"-")}</b><br>
+        ${escapeHtml(s.street||"")}, ${escapeHtml(s.plz||"")} ${escapeHtml(s.ort||"")}
+      </div>
+      <div class="list-actions">
+        <a href="${telHref(s.phone)}">📞 ${escapeHtml(s.phone||"")}</a>
+        <a href="${mapsHref(s.street,s.plz,s.ort)}" target="_blank" rel="noopener">🧭 Route</a>
+        ${editMode ? `<button class="edit-link" onclick="openEditModal('${s.id}')">✏️ Bearbeiten</button>` : ''}
+      </div>
+    </div>
+  `).join("");
+}
+
+document.getElementById("searchInput").addEventListener("input", renderFullList);
+
+// =====================================================================
+// BEARBEITUNGSMODUS (Kürzel-Pflicht)
+// =====================================================================
+const editToggleBtn = document.getElementById("editToggleBtn");
+const kuerzelModal = document.getElementById("kuerzelModal");
+const supplierModal = document.getElementById("supplierModal");
+const addFab = document.getElementById("addFab");
+
+editToggleBtn.addEventListener("click", ()=>{
+  if(editMode){
+    editMode = false;
+    myKuerzel = "";
+    editToggleBtn.classList.remove("on");
+    addFab.classList.remove("show");
+    renderNearest();
+    renderFullList();
+  } else {
+    document.getElementById("kuerzelInput").value = "";
+    kuerzelModal.classList.add("show");
+  }
+});
+
+document.getElementById("kuerzelCancel").addEventListener("click", ()=>{
+  kuerzelModal.classList.remove("show");
+});
+
+document.getElementById("kuerzelConfirm").addEventListener("click", ()=>{
+  const val = document.getElementById("kuerzelInput").value.trim().toUpperCase();
+  if(!val){
+    alert("Bitte ein Kürzel eingeben.");
+    return;
+  }
+  myKuerzel = val;
+  editMode = true;
+  editToggleBtn.classList.add("on");
+  addFab.classList.add("show");
+  kuerzelModal.classList.remove("show");
+  renderNearest();
+  renderFullList();
+});
+
+addFab.addEventListener("click", ()=> openEditModal(null));
+
+function openEditModal(id){
+  editingId = id;
+  const isNew = id === null;
+  document.getElementById("supplierModalTitle").textContent = isNew ? "Neuen Lieferanten hinzufügen" : "Lieferant bearbeiten";
+  document.getElementById("kuerzelBanner").textContent = "Angemeldet als Kürzel: " + myKuerzel;
+  document.getElementById("deleteRow").style.display = isNew ? "none" : "flex";
+
+  if(isNew){
+    document.getElementById("f_name").value = "";
+    document.getElementById("f_cat").value = "Betonwerk";
+    document.getElementById("f_contact").value = "";
+    document.getElementById("f_phone").value = "";
+    document.getElementById("f_street").value = "";
+    document.getElementById("f_plz").value = "";
+    document.getElementById("f_ort").value = "";
+    document.getElementById("f_lat").value = "";
+    document.getElementById("f_lon").value = "";
+  } else {
+    const s = SUPPLIERS.find(x=>x.id===id);
+    if(!s) return;
+    document.getElementById("f_name").value = s.name||"";
+    document.getElementById("f_cat").value = s.cat||"Betonwerk";
+    document.getElementById("f_contact").value = s.contact||"";
+    document.getElementById("f_phone").value = s.phone||"";
+    document.getElementById("f_street").value = s.street||"";
+    document.getElementById("f_plz").value = s.plz||"";
+    document.getElementById("f_ort").value = s.ort||"";
+    document.getElementById("f_lat").value = s.lat!=null ? s.lat : "";
+    document.getElementById("f_lon").value = s.lon!=null ? s.lon : "";
+  }
+  supplierModal.classList.add("show");
+}
+
+document.getElementById("supplierCancel").addEventListener("click", ()=>{
+  supplierModal.classList.remove("show");
+});
+
+document.getElementById("geocodeBtn").addEventListener("click", async ()=>{
+  const street = document.getElementById("f_street").value.trim();
+  const plz = document.getElementById("f_plz").value.trim();
+  const ort = document.getElementById("f_ort").value.trim();
+  const q = [street, plz, ort].filter(Boolean).join(", ");
+  if(!q){ alert("Bitte zuerst Straße/PLZ/Ort eingeben."); return; }
+  const btn = document.getElementById("geocodeBtn");
+  btn.textContent = "Suche...";
+  try{
+    const url = "https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=de&q=" + encodeURIComponent(q);
+    const res = await fetch(url, {headers:{"Accept-Language":"de"}});
+    const data = await res.json();
+    if(data && data.length > 0){
+      document.getElementById("f_lat").value = parseFloat(data[0].lat).toFixed(5);
+      document.getElementById("f_lon").value = parseFloat(data[0].lon).toFixed(5);
+    } else {
+      alert("Adresse nicht gefunden. Bitte Koordinaten manuell eingeben oder Adresse präzisieren.");
+    }
+  } catch(e){
+    alert("Geocoding fehlgeschlagen (keine Internetverbindung?).");
+  }
+  btn.textContent = "📍 Koordinaten aus Adresse suchen";
+});
+
+document.getElementById("supplierSave").addEventListener("click", ()=>{
+  const name = document.getElementById("f_name").value.trim();
+  const phone = document.getElementById("f_phone").value.trim();
+  const ort = document.getElementById("f_ort").value.trim();
+  if(!name || !phone || !ort){
+    alert("Bitte mindestens Firmenname, Telefonnummer und Ort ausfüllen.");
+    return;
+  }
+  const data = {
+    name,
+    cat: document.getElementById("f_cat").value,
+    contact: document.getElementById("f_contact").value.trim(),
+    phone,
+    street: document.getElementById("f_street").value.trim(),
+    plz: document.getElementById("f_plz").value.trim(),
+    ort,
+    lat: parseFloat(document.getElementById("f_lat").value) || null,
+    lon: parseFloat(document.getElementById("f_lon").value) || null,
+    editedBy: myKuerzel,
+    updatedAt: Date.now()
+  };
+
+  if(!firebaseReady){
+    alert("Keine Firebase-Verbindung – Änderung wird nur lokal angezeigt und geht beim Neuladen verloren. Bitte Firebase einrichten (siehe Anleitung).");
+    if(editingId){
+      const idx = SUPPLIERS.findIndex(s=>s.id===editingId);
+      if(idx>-1) SUPPLIERS[idx] = {...SUPPLIERS[idx], ...data};
+    } else {
+      SUPPLIERS.push({id:"local_"+Date.now(), ...data});
+    }
+    supplierModal.classList.remove("show");
+    plotMarkers(); renderNearest(); renderFullList();
+    return;
+  }
+
+  const ref = db.ref('lieferanten');
+  if(editingId){
+    ref.child(editingId).update(data).then(()=>{
+      supplierModal.classList.remove("show");
+    }).catch(e=> alert("Fehler beim Speichern: " + e.message));
+  } else {
+    ref.push(data).then(()=>{
+      supplierModal.classList.remove("show");
+    }).catch(e=> alert("Fehler beim Speichern: " + e.message));
+  }
+});
+
+document.getElementById("supplierDelete").addEventListener("click", ()=>{
+  if(!editingId) return;
+  if(!confirm("Diesen Lieferanten wirklich löschen?")) return;
+  if(!firebaseReady){
+    SUPPLIERS = SUPPLIERS.filter(s=>s.id!==editingId);
+    supplierModal.classList.remove("show");
+    plotMarkers(); renderNearest(); renderFullList();
+    return;
+  }
+  db.ref('lieferanten').child(editingId).remove().then(()=>{
+    supplierModal.classList.remove("show");
+  }).catch(e=> alert("Fehler beim Löschen: " + e.message));
+});
+
+// ===== INIT =====
+initMap();
+loadSuppliers();
+</script>
+
+</body>
+</html>
