@@ -282,6 +282,11 @@
 
   <div class="sync-banner" id="syncBanner"></div>
 
+  <div class="locate-bar" id="resetBar" style="display:none; border-left:4px solid var(--coral);">
+    <div class="locate-status" style="flex:2;">⚠️ Setzt <b>alle</b> Lieferanten auf den Stand zurück, der aktuell im Code hinterlegt ist. Eigene Änderungen/neue Lieferanten, die danach gemacht wurden, gehen dabei verloren.</div>
+    <button class="locate-btn" id="resetDbBtn" style="background:var(--coral-dark);">🔄 Datenbank auf Standardliste zurücksetzen</button>
+  </div>
+
   <!-- MAP / NEAREST VIEW -->
   <section id="mapview" class="view active">
     <div class="locate-bar">
@@ -394,13 +399,13 @@
 //  Datenbank-Pfad "lieferanten" benutzen.)
 // =====================================================================
 const firebaseConfig = {
-  apiKey: "DEIN_API_KEY",
-  authDomain: "DEIN_PROJEKT.firebaseapp.com",
-  databaseURL: "https://DEIN_PROJEKT-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "DEIN_PROJEKT",
-  storageBucket: "DEIN_PROJEKT.appspot.com",
-  messagingSenderId: "...",
-  appId: "..."
+  apiKey: "AIzaSyBAZLaENG685iozLkG9yUKup6vlxjWzdkA",
+  authDomain: "schachtmeister-kontaktliste.firebaseapp.com",
+  databaseURL: "https://schachtmeister-kontaktliste-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "schachtmeister-kontaktliste",
+  storageBucket: "schachtmeister-kontaktliste.firebasestorage.app",
+  messagingSenderId: "924568625611",
+  appId: "1:924568625611:web:d5973671928db4216ad64e"
 };
 
 let db = null;
@@ -431,9 +436,9 @@ const DEFAULT_SUPPLIERS = [
     "phone": "+49 2934 96260",
     "street": "Osterfeld 1",
     "plz": "59846",
-    "ort": "Sundern",
-    "lat": 51.2984,
-    "lon": 8.0124
+    "ort": "Sundern-Hellefeld",
+    "lat": 51.3276723,
+    "lon": 8.073198
   },
   {
     "name": "Heinrich Ebel GmbH & Co. KG",
@@ -443,19 +448,19 @@ const DEFAULT_SUPPLIERS = [
     "street": "Gut Habbel 1",
     "plz": "59757",
     "ort": "Arnsberg",
-    "lat": 51.4112,
-    "lon": 7.9823
+    "lat": 51.4023199,
+    "lon": 7.9790822
   },
   {
     "name": "Lanwehr Naturstein GmbH & Co. KG",
     "cat": "Steinbruch / Straßenbaustoffe",
     "contact": "Vertriebsleitung",
     "phone": "+49 2932 24044",
-    "street": "Hellefelder Str. 100",
-    "plz": "59759",
-    "ort": "Arnsberg",
-    "lat": 51.3789,
-    "lon": 8.0412
+    "street": "Am Langen Stück 1",
+    "plz": "59757",
+    "ort": "Arnsberg-Müschede",
+    "lat": 51.39849449797513,
+    "lon": 8.010305522635699
   },
   {
     "name": "BERDING BETON GmbH",
@@ -465,8 +470,8 @@ const DEFAULT_SUPPLIERS = [
     "street": "Hüttenstr. 13",
     "plz": "59759",
     "ort": "Arnsberg",
-    "lat": 51.4552,
-    "lon": 7.9612
+    "lat": 51.4350827,
+    "lon": 7.9864321
   },
   {
     "name": "Transportbeton-Westenfeld GmbH",
@@ -476,8 +481,8 @@ const DEFAULT_SUPPLIERS = [
     "street": "Möhnestr. 141",
     "plz": "59755",
     "ort": "Arnsberg",
-    "lat": 51.4621,
-    "lon": 7.9945
+    "lat": 51.4580522,
+    "lon": 7.9771737
   },
   {
     "name": "Sauerländer Bau- und Transportbeton",
@@ -487,8 +492,8 @@ const DEFAULT_SUPPLIERS = [
     "street": "Im Schlahn 4",
     "plz": "59872",
     "ort": "Meschede",
-    "lat": 51.3325,
-    "lon": 8.2415
+    "lat": 51.3543126,
+    "lon": 8.2529487
   },
   {
     "name": "AMW Asphaltmischwerke Westfalen",
@@ -498,8 +503,8 @@ const DEFAULT_SUPPLIERS = [
     "street": "Kanalstraße 45",
     "plz": "44147",
     "ort": "Dortmund",
-    "lat": 51.5298,
-    "lon": 7.4452
+    "lat": 51.5306567,
+    "lon": 7.4408581
   },
   {
     "name": "Steinbruch Schulte Grauwacke",
@@ -509,8 +514,8 @@ const DEFAULT_SUPPLIERS = [
     "street": "Heerstraße 26",
     "plz": "57489",
     "ort": "Drolshagen",
-    "lat": 51.0423,
-    "lon": 7.7315
+    "lat": 51.062671,
+    "lon": 7.7395571
   },
   {
     "name": "CEMEX Deutschland AG - Werk Hagen",
@@ -520,8 +525,8 @@ const DEFAULT_SUPPLIERS = [
     "street": "Kabeler Str. 54",
     "plz": "58099",
     "ort": "Hagen",
-    "lat": 51.4021,
-    "lon": 7.4812
+    "lat": 51.408577,
+    "lon": 7.47906
   },
   {
     "name": "Asphaltmischwerk Sauerland GmbH",
@@ -531,8 +536,8 @@ const DEFAULT_SUPPLIERS = [
     "street": "Rösenbecker Str. 12",
     "plz": "59929",
     "ort": "Brilon",
-    "lat": 51.4012,
-    "lon": 8.6145
+    "lat": 51.4166868,
+    "lon": 8.6477531
   },
   {
     "name": "Heidelberg Materials AG",
@@ -542,8 +547,8 @@ const DEFAULT_SUPPLIERS = [
     "street": "Südstraße 22",
     "plz": "59557",
     "ort": "Lippstadt",
-    "lat": 51.6624,
-    "lon": 8.3512
+    "lat": 51.6508057,
+    "lon": 8.362795
   },
   {
     "name": "Basalt-Actien-Gesellschaft",
@@ -553,8 +558,8 @@ const DEFAULT_SUPPLIERS = [
     "street": "Eiserntalstraße 151",
     "plz": "57080",
     "ort": "Siegen",
-    "lat": 50.8425,
-    "lon": 8.0314
+    "lat": 50.8302641,
+    "lon": 8.0009803
   },
   {
     "name": "HOCHTIEF Infrastructure GmbH",
@@ -564,8 +569,8 @@ const DEFAULT_SUPPLIERS = [
     "street": "Opernplatz 2",
     "plz": "45128",
     "ort": "Essen",
-    "lat": 51.4485,
-    "lon": 7.0124
+    "lat": 51.4471148,
+    "lon": 7.0139919
   },
   {
     "name": "Holcim Beton und Betonwaren",
@@ -575,8 +580,8 @@ const DEFAULT_SUPPLIERS = [
     "street": "Radbodstraße 21",
     "plz": "59075",
     "ort": "Hamm",
-    "lat": 51.6812,
-    "lon": 7.7854
+    "lat": 51.6804461,
+    "lon": 7.7865259
   },
   {
     "name": "Bickhardt Bau Ruhr GmbH",
@@ -586,8 +591,8 @@ const DEFAULT_SUPPLIERS = [
     "street": "Dortmunder Str. 110",
     "plz": "44536",
     "ort": "Lünen",
-    "lat": 51.5942,
-    "lon": 7.5124
+    "lat": 51.6008583,
+    "lon": 7.4895991
   },
   {
     "name": "Klösters Baustoffe GmbH",
@@ -597,8 +602,8 @@ const DEFAULT_SUPPLIERS = [
     "street": "Am Parallelhafen 12",
     "plz": "47059",
     "ort": "Duisburg",
-    "lat": 51.4285,
-    "lon": 6.7451
+    "lat": 51.4307985,
+    "lon": 6.7359723
   },
   {
     "name": "Deutsche Asphalt GmbH",
@@ -608,8 +613,8 @@ const DEFAULT_SUPPLIERS = [
     "street": "Alfred-Schütte-Allee 10",
     "plz": "50679",
     "ort": "Köln",
-    "lat": 50.9254,
-    "lon": 6.9851
+    "lat": 50.9226172,
+    "lon": 6.9757639
   },
   {
     "name": "Lhoist Germany - Rheinkalk GmbH",
@@ -619,8 +624,8 @@ const DEFAULT_SUPPLIERS = [
     "street": "Am Kalkstein 1",
     "plz": "42489",
     "ort": "Wülfrath",
-    "lat": 51.2845,
-    "lon": 7.0412
+    "lat": 51.2801139,
+    "lon": 7.0224256
   },
   {
     "name": "Remondis Baustoff Recycling",
@@ -630,8 +635,8 @@ const DEFAULT_SUPPLIERS = [
     "street": "Brunnenstraße 138",
     "plz": "44536",
     "ort": "Lünen",
-    "lat": 51.6112,
-    "lon": 7.5312
+    "lat": 51.6162572,
+    "lon": 7.4645642
   },
   {
     "name": "Readymix Transportbeton",
@@ -641,8 +646,8 @@ const DEFAULT_SUPPLIERS = [
     "street": "Gelsenkirchener Str. 10",
     "plz": "45881",
     "ort": "Gelsenkirchen",
-    "lat": 51.5214,
-    "lon": 7.0915
+    "lat": 51.5177,
+    "lon": 7.0857
   },
   {
     "name": "Bernhard Mühlenbein Kalksteinbrüche-Rösenbeck GmbH & Co. KG",
@@ -652,8 +657,8 @@ const DEFAULT_SUPPLIERS = [
     "street": "Im Steinborn 16",
     "plz": "59929",
     "ort": "Brilon-Rösenbeck",
-    "lat": 51.359,
-    "lon": 8.6195
+    "lat": 51.415863,
+    "lon": 8.6939496
   },
   {
     "name": "Briloner Hartsteinwerk GmbH & Co. KG",
@@ -663,8 +668,8 @@ const DEFAULT_SUPPLIERS = [
     "street": "In der Einzel 1",
     "plz": "59929",
     "ort": "Brilon",
-    "lat": 51.398,
-    "lon": 8.5755
+    "lat": 51.380352,
+    "lon": 8.5400667
   },
   {
     "name": "Sauerländer Hartkalkstein-Industrie GmbH",
@@ -674,8 +679,8 @@ const DEFAULT_SUPPLIERS = [
     "street": "Almer Str. 61",
     "plz": "59929",
     "ort": "Brilon-Alme",
-    "lat": 51.343,
-    "lon": 8.648
+    "lat": 51.4391655,
+    "lon": 8.6953888
   },
   {
     "name": "Weiken Kalksteinbrüche u. Schotterwerk GmbH & Co. KG, Fritz",
@@ -685,8 +690,8 @@ const DEFAULT_SUPPLIERS = [
     "street": "Kreisstr. 48",
     "plz": "59581",
     "ort": "Warstein-Suttrop",
-    "lat": 51.4625,
-    "lon": 8.332
+    "lat": 51.4539942,
+    "lon": 8.3693492
   },
   {
     "name": "Steinwerke F. J. Risse GmbH & Co. KG",
@@ -696,8 +701,8 @@ const DEFAULT_SUPPLIERS = [
     "street": "Hauptstr. 34",
     "plz": "59581",
     "ort": "Warstein",
-    "lat": 51.4421,
-    "lon": 8.346
+    "lat": 51.446593,
+    "lon": 8.3553546
   },
   {
     "name": "Westf. Muschelkalk-Steinbruch Joh. Blome GmbH & Co. KG",
@@ -707,8 +712,8 @@ const DEFAULT_SUPPLIERS = [
     "street": "Oesterstr. 24",
     "plz": "34431",
     "ort": "Marsberg",
-    "lat": 51.453,
-    "lon": 8.852
+    "lat": 51.4581574,
+    "lon": 8.8676055
   },
   {
     "name": "Natursteinwerk Rinsche",
@@ -718,8 +723,8 @@ const DEFAULT_SUPPLIERS = [
     "street": "Soestkamp",
     "plz": "59609",
     "ort": "Anröchte",
-    "lat": 51.6325,
-    "lon": 8.3268
+    "lat": 51.57428,
+    "lon": 8.29431
   },
   {
     "name": "Heinrich Rohde Diabaswerk & Asphaltmischanlage",
@@ -729,8 +734,8 @@ const DEFAULT_SUPPLIERS = [
     "street": "Am Steinbruch 7",
     "plz": "33181",
     "ort": "Bad Wünnenberg",
-    "lat": 51.521,
-    "lon": 8.734
+    "lat": 51.3822211,
+    "lon": 8.8004635
   },
   {
     "name": "Westdeutsche Grauwacke-Union GmbH – Werk Berge",
@@ -740,8 +745,8 @@ const DEFAULT_SUPPLIERS = [
     "street": "Zur Winnschla",
     "plz": "59872",
     "ort": "Meschede-Berge",
-    "lat": 51.342,
-    "lon": 8.315
+    "lat": 51.3280443,
+    "lon": 8.1637895
   },
   {
     "name": "Westdeutsche Grauwacke-Union GmbH – Werk Silbach",
@@ -751,8 +756,8 @@ const DEFAULT_SUPPLIERS = [
     "street": "Bergfreiheit 2",
     "plz": "59955",
     "ort": "Winterberg-Silbach",
-    "lat": 51.196,
-    "lon": 8.476
+    "lat": 51.2192393,
+    "lon": 8.4843221
   },
   {
     "name": "Westdeutsche Grauwacke-Union GmbH – Werk Bilstein",
@@ -762,8 +767,8 @@ const DEFAULT_SUPPLIERS = [
     "street": "Am Bilstein 1",
     "plz": "59929",
     "ort": "Brilon",
-    "lat": 51.43,
-    "lon": 8.56
+    "lat": 51.37863,
+    "lon": 8.61894
   },
   {
     "name": "Mineral Baustoff GmbH – Werk Berge",
@@ -773,8 +778,8 @@ const DEFAULT_SUPPLIERS = [
     "street": "Zur Winnschla 23",
     "plz": "59872",
     "ort": "Meschede-Berge",
-    "lat": 51.3415,
-    "lon": 8.314
+    "lat": 51.3302207,
+    "lon": 8.173912
   },
   {
     "name": "Diabaswerk Halbeswig GmbH & Co. KG",
@@ -784,8 +789,8 @@ const DEFAULT_SUPPLIERS = [
     "street": "Halbeswig",
     "plz": "59909",
     "ort": "Bestwig-Halbeswig",
-    "lat": 51.345,
-    "lon": 8.53
+    "lat": 51.3279464,
+    "lon": 8.3837706
   }
 ];
 
@@ -956,9 +961,27 @@ function tryGeolocation(highAccuracy){
       status.textContent = "Erneuter Versuch (ungenaue Ortung)…";
       tryGeolocation(false);
     } else {
-      status.textContent = "Standort nicht ermittelbar (" + err.message + "). Bitte PLZ/Ort unten manuell eingeben.";
+      status.textContent = "GPS nicht verfügbar – versuche ungefähren Standort per Internetverbindung zu ermitteln…";
+      tryIpLocation();
     }
   }, {enableHighAccuracy: highAccuracy, timeout: highAccuracy ? 8000 : 20000, maximumAge: 60000});
+}
+
+// Fallback ohne jegliche Berechtigung: ungefährer Standort über die IP-Adresse
+// (funktioniert auf jedem Desktop-PC/Laptop ohne GPS-Hardware, Genauigkeit: Stadt-Ebene)
+async function tryIpLocation(){
+  const status = document.getElementById("locateStatus");
+  try{
+    const res = await fetch("https://ipapi.co/json/");
+    const data = await res.json();
+    if(data && data.latitude && data.longitude){
+      setUserPos(data.latitude, data.longitude, "Ungefährer Standort (per Internetverbindung, Stadt-Ebene): " + (data.city||"") + " ✓");
+    } else {
+      status.textContent = "Standort nicht ermittelbar. Bitte PLZ/Ort unten manuell eingeben.";
+    }
+  } catch(e){
+    status.textContent = "Standort nicht ermittelbar. Bitte PLZ/Ort unten manuell eingeben.";
+  }
 }
 
 document.getElementById("locateBtn").addEventListener("click", ()=>{
@@ -1088,6 +1111,7 @@ editToggleBtn.addEventListener("click", ()=>{
     myKuerzel = "";
     editToggleBtn.classList.remove("on");
     addFab.classList.remove("show");
+    document.getElementById("resetBar").style.display = "none";
     renderNearest();
     renderFullList();
   } else {
@@ -1110,9 +1134,31 @@ document.getElementById("kuerzelConfirm").addEventListener("click", ()=>{
   editMode = true;
   editToggleBtn.classList.add("on");
   addFab.classList.add("show");
+  document.getElementById("resetBar").style.display = "flex";
   kuerzelModal.classList.remove("show");
   renderNearest();
   renderFullList();
+});
+
+document.getElementById("resetDbBtn").addEventListener("click", ()=>{
+  if(!confirm("Wirklich ALLE Lieferanten auf die Standardliste zurücksetzen? Eigene Änderungen gehen dabei verloren. Das kann nicht rückgängig gemacht werden.")) return;
+  if(!firebaseReady){
+    SUPPLIERS = DEFAULT_SUPPLIERS.map((s,i)=>({...s, id:"default_"+i}));
+    plotMarkers(); renderNearest(); renderFullList();
+    alert("Keine Firebase-Verbindung – lokale Anzeige wurde zurückgesetzt (nicht dauerhaft gespeichert).");
+    return;
+  }
+  const ref = db.ref('lieferanten');
+  ref.remove().then(()=>{
+    const updates = {};
+    DEFAULT_SUPPLIERS.forEach(s=>{
+      const newRef = ref.push();
+      updates[newRef.key] = {...s, editedBy:"RESET", updatedAt: Date.now()};
+    });
+    return ref.update(updates);
+  }).then(()=>{
+    alert("Datenbank wurde auf die Standardliste zurückgesetzt.");
+  }).catch(e=> alert("Fehler beim Zurücksetzen: " + e.message));
 });
 
 addFab.addEventListener("click", ()=> openEditModal(null));
