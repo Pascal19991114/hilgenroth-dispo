@@ -84,6 +84,28 @@
   .edit-toggle-btn.on{ background:var(--coral); border-color:var(--coral); }
 
   main{ padding:12px; max-width:900px; margin:0 auto; }
+
+  /* Mobil (Standard): alles gestapelt in natürlicher Reihenfolge */
+  .map-layout{ display:flex; flex-direction:column; }
+
+  /* Ab Desktop-Breite: zweispaltig, Karte rechts fixiert, Liste links scrollt */
+  @media (min-width: 980px){
+    main.is-mapview{ max-width:1400px; }
+    .map-layout{
+      display:grid;
+      grid-template-columns: 400px 1fr;
+      grid-template-areas: "controls map" "results map";
+      grid-template-rows: auto 1fr;
+      gap:16px;
+      align-items:start;
+      height: calc(100vh - var(--header-h) - 24px);
+    }
+    .map-controls{ grid-area: controls; }
+    .map-results{ grid-area: results; overflow-y:auto; min-height:0; padding-right:4px; }
+    .map-main{ grid-area: map; height:100%; position:sticky; top:12px; }
+    .map-main #map{ height:100%; margin-bottom:0; }
+    .nearest-card{ cursor:pointer; }
+  }
   .view{display:none;}
   .view.active{display:block;}
 
@@ -289,20 +311,25 @@
 
   <!-- MAP / NEAREST VIEW -->
   <section id="mapview" class="view active">
-    <div class="locate-bar">
-      <button class="locate-btn" id="locateBtn">📍 Meinen Standort verwenden</button>
-      <div class="locate-status" id="locateStatus">Standort noch nicht ermittelt.</div>
+    <div class="map-layout">
+      <div class="map-controls">
+        <div class="locate-bar">
+          <button class="locate-btn" id="locateBtn">📍 Meinen Standort verwenden</button>
+          <div class="locate-status" id="locateStatus">Standort noch nicht ermittelt.</div>
+        </div>
+        <div class="locate-bar" style="margin-top:-4px;">
+          <input type="text" id="manualLocation" class="search-bar" style="margin:0;" placeholder="...oder PLZ / Ort manuell eingeben (z.B. 59846 Sundern)">
+          <button class="locate-btn" id="manualLocateBtn" style="background:var(--dark);">Suchen</button>
+        </div>
+      </div>
+      <div class="map-main">
+        <div id="map"></div>
+      </div>
+      <div class="map-results">
+        <div class="filter-row" id="filterRow"></div>
+        <div id="nearestList"></div>
+      </div>
     </div>
-    <div class="locate-bar" style="margin-top:-4px;">
-      <input type="text" id="manualLocation" class="search-bar" style="margin:0;" placeholder="...oder PLZ / Ort manuell eingeben (z.B. 59846 Sundern)">
-      <button class="locate-btn" id="manualLocateBtn" style="background:var(--dark);">Suchen</button>
-    </div>
-
-    <div id="map"></div>
-
-    <div class="filter-row" id="filterRow"></div>
-
-    <div id="nearestList"></div>
   </section>
 
   <!-- FULL LIST VIEW -->
@@ -895,9 +922,11 @@ document.querySelectorAll(".tab-btn").forEach(btn=>{
     btn.classList.add("active");
     document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
     document.getElementById(btn.dataset.view).classList.add("active");
+    document.querySelector("main").classList.toggle("is-mapview", btn.dataset.view === "mapview");
     if(btn.dataset.view === "mapview" && map){ setTimeout(()=>map.invalidateSize(), 100); }
   });
 });
+document.querySelector("main").classList.add("is-mapview");
 
 // ===== FILTER CHIPS =====
 function buildFilterRow(container, onSelect){
@@ -1287,6 +1316,7 @@ document.getElementById("supplierDelete").addEventListener("click", ()=>{
 
 // ===== INIT =====
 initMap();
+setTimeout(()=>{ if(map) map.invalidateSize(); }, 200);
 loadSuppliers();
 </script>
 
