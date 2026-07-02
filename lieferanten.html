@@ -354,6 +354,14 @@
             <svg width="16" height="16" xmlns="http://www.w3.org/2000/svg"><polygon points="8,1 15,8 8,15 1,8" fill="#6b6f76" stroke="white" stroke-width="2"/><text x="8" y="11.5" text-anchor="middle" font-size="7" font-weight="bold" fill="white" font-family="Arial">S</text></svg>
             Steinbruch
           </div>
+          <div class="map-legend-item">
+            <svg width="16" height="16" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="6" fill="#1a7abf" stroke="white" stroke-width="2"/><text x="8" y="12" text-anchor="middle" font-size="7" font-weight="bold" fill="white" font-family="Arial">H</text></svg>
+            Baustoffhändler
+          </div>
+          <div class="map-legend-item">
+            <svg width="16" height="16" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" width="14" height="14" rx="2" fill="#5a8a3c" stroke="white" stroke-width="2"/><text x="8" y="12" text-anchor="middle" font-size="7" font-weight="bold" fill="white" font-family="Arial">D</text></svg>
+            Deponie
+          </div>
         </div>
       </div>
       <div class="map-results">
@@ -405,6 +413,8 @@
         <option value="Betonwerk">Betonwerk</option>
         <option value="Asphaltwerk">Asphaltwerk</option>
         <option value="Steinbruch / Straßenbaustoffe">Steinbruch / Straßenbaustoffe</option>
+        <option value="Baustoffhändler">Baustoffhändler</option>
+        <option value="Deponie">Deponie</option>
       </select>
     </div>
     <div class="form-row">
@@ -855,7 +865,9 @@ const DEFAULT_SUPPLIERS = [
 const CAT_STYLES = {
   "Betonwerk":                   {color:"#e8503a", shape:"circle",   label:"B"},
   "Asphaltwerk":                 {color:"#2b2d31", shape:"square",   label:"A"},
-  "Steinbruch / Straßenbaustoffe":{color:"#6b6f76", shape:"diamond", label:"S"}
+  "Steinbruch / Straßenbaustoffe":{color:"#6b6f76", shape:"diamond", label:"S"},
+  "Baustoffhändler":             {color:"#1a7abf", shape:"circle",   label:"H"},
+  "Deponie":                     {color:"#5a8a3c", shape:"square",   label:"D"}
 };
 
 function makeMarkerIcon(cat){
@@ -995,7 +1007,7 @@ document.querySelector("main").classList.add("is-mapview");
 
 // ===== FILTER CHIPS =====
 function buildFilterRow(container, onSelect){
-  const cats = ["Alle", "Betonwerk", "Asphaltwerk", "Steinbruch / Straßenbaustoffe"];
+  const cats = ["Alle", "Betonwerk", "Asphaltwerk", "Steinbruch / Straßenbaustoffe", "Baustoffhändler", "Deponie"];
   container.innerHTML = "";
   cats.forEach(c=>{
     const chip = document.createElement("div");
